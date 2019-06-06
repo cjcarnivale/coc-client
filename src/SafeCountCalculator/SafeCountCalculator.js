@@ -35,6 +35,26 @@ export default class SafeCountCalculator extends Component {
           name: "Fives",
           count: 0,
           multiplier: 5
+        },
+        {
+          name: "Tens",
+          count: 0,
+          multiplier: 10
+        },
+        {
+          name: "Twenties",
+          count: 0,
+          multiplier: 20
+        },
+        {
+          name: "Fifties",
+          count: 0,
+          multiplier: 50
+        },
+        {
+          name: "Hundreds",
+          count: 0,
+          multiplier: 100
         }
       ]
     };
