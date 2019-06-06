@@ -8,7 +8,8 @@ export default class SafeCountCalculator extends Component {
     this.state = {
       currency: [],
       isLoaded: false,
-      error: null
+      error: null,
+      confirmSubmit: false
     };
   }
 
@@ -19,6 +20,12 @@ export default class SafeCountCalculator extends Component {
       currency
     });
   };
+
+  toggleConfirmSubmit = () => {
+    this.setState({
+      confirmSubmit: !this.state.confirmSubmit
+    })
+  }
 
   render() {
     return (
@@ -49,7 +56,13 @@ export default class SafeCountCalculator extends Component {
                   0
                 )}
               </div>
-              <button type="submit">Submit Count</button>
+              {!this.state.confirmSubmit
+                ? <button type="button" onClick={this.toggleConfirmSubmit}>Submit Count</button>
+                : <div>
+                    <button type="submit">Confirm</button>
+                    <button type="button" onClick={this.toggleConfirmSubmit}>Cancel</button>
+                  </div>
+              }
             </form>}
           </div>
     );
