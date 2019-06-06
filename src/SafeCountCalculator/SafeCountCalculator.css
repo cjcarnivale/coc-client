@@ -1,0 +1,28 @@
+.count-form-container{
+  display: flex;
+  justify-content: center;
+  margin-top: 30px; 
+}
+
+.count-form span {
+  display: inline-block; 
+  width: 100px;
+  text-align: left;   
+}
+
+.count-form input{
+  margin-right: 10px; 
+  width: 50px; 
+}
+
+.count-form button{ 
+  margin-top: 20px; 
+}
+
+.grand-total{
+  margin-top: 20px;  
+}
+
+.count-form{
+  text-align: center; 
+}
