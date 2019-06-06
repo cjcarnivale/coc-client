@@ -1,9 +1,10 @@
 import React from 'react';
+import SafeCountCalculator from './SafeCountCalculator';
 
 function App() {
   return (
     <main className='App'>
-      {/* content goes here */}
+      <SafeCountCalculator />
     </main>
   );
 }
