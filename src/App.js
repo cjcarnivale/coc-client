@@ -1,11 +1,10 @@
 import React from "react";
-import SafeCountCalculator from "./SafeCountCalculator/SafeCountCalculator";
+import Dashboard from "./routes/Dashboard/Dashboard.Route";
 
 function App() {
   return (
     <main className="App">
-      <h2>Safe Count</h2>
-      <SafeCountCalculator />
+     <Dashboard />
     </main>
   );
 }

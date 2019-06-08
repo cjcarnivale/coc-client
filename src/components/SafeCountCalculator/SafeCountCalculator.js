@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./SafeCountCalculator.css";
-import Config from "../config";
+import Config from "../../config";
 import dayjs from "dayjs"
 
 export default class SafeCountCalculator extends Component {
