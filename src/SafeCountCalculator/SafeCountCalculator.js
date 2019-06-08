@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "./SafeCountCalculator.css";
 import Config from "../config";
+import dayjs from "dayjs"
 
 export default class SafeCountCalculator extends Component {
   constructor(props) {
@@ -27,7 +28,29 @@ export default class SafeCountCalculator extends Component {
     });
   };
 
+  resetCounts = () => {
+    let copy = [...this.state.currency];
+    let reset = [];
+    for (let i = 0; i < copy.length; i++) {
+      const den = copy[i];
+      den.count = 0;
+      reset.push(den);
+    }
+    this.setState({
+      currency: reset
+    });
+  };
+
   render() {
+    const gTotal = this.state.currency.reduce(
+      (accumulator, currentValue) =>
+        accumulator + currentValue.count * currentValue.multiplier,
+      0
+    );
+
+    let date = Date.now(); 
+    date = dayjs(date).format('MM/DD/YYYY');
+
     return (
       <div className="count-form-container">
         {!this.state.isLoaded ? (
@@ -35,41 +58,49 @@ export default class SafeCountCalculator extends Component {
         ) : this.state.error ? (
           <div className="error">OOPS... something went wrong!</div>
         ) : (
-          <form className="count-form">
-            {this.state.currency.map((den, i) => (
-              <div className="currency-item" key={i}>
-                <span>{den.name}</span>
-                <input
-                  type="number"
-                  min="0"
-                  value={this.state.currency[i].count}
-                  onChange={e => this.updateCount(i, e)}
-                />
-                <span>{i < 4 ? "roll(s)" : "bill(s)"}</span>
-                <span>Total: $ {den.count * den.multiplier}</span>
+          <div>
+            <div className="date-display">Date: {date}</div>
+            <form className="count-form">
+              {this.state.currency.map((den, i) => (
+                <div className="currency-item" key={i}>
+                  <span>{den.name}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={this.state.currency[i].count}
+                    onChange={e => this.updateCount(i, e)}
+                  />
+                  <span>{i < 4 ? "roll(s)" : "bill(s)"}</span>
+                  <span>Total: $ {den.count * den.multiplier}</span>
+                </div>
+              ))}
+              <div className="grand-total">
+                Grand Total: {gTotal}
+                {gTotal !== 1750 && (
+                  <div>
+                    Your count does not match what should be in the safe
+                  </div>
+                )}
               </div>
-            ))}
-            <div className="grand-total">
-              Grand Total:{" "}
-              {this.state.currency.reduce(
-                (accumulator, currentValue) =>
-                  accumulator + currentValue.count * currentValue.multiplier,
-                0
+              {!this.state.confirmSubmit ? (
+                <div>
+                  <button type="button" onClick={this.toggleConfirmSubmit}>
+                    Submit Count
+                  </button>
+                  <button type="button" onClick={this.resetCounts}>
+                    Reset
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <button type="submit">Confirm</button>
+                  <button type="button" onClick={this.toggleConfirmSubmit}>
+                    Cancel
+                  </button>
+                </div>
               )}
-            </div>
-            {!this.state.confirmSubmit ? (
-              <button type="button" onClick={this.toggleConfirmSubmit}>
-                Submit Count
-              </button>
-            ) : (
-              <div>
-                <button type="submit">Confirm</button>
-                <button type="button" onClick={this.toggleConfirmSubmit}>
-                  Cancel
-                </button>
-              </div>
-            )}
-          </form>
+            </form>
+          </div>
         )}
       </div>
     );

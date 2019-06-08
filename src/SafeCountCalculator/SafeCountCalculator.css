@@ -30,7 +30,7 @@
   width: 500px;   
 }
 
-.error, .loading {
+.error, .loading, .date-display{
   text-align: center; 
 }
 
