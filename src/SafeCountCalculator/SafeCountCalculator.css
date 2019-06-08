@@ -29,3 +29,22 @@
   border-radius: 10px;
   width: 500px;   
 }
+
+.error, .loading {
+  text-align: center; 
+}
+
+.error {
+  color: red; 
+  font-size: 2em; 
+}
+
+.loading {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker{
+  50%{
+    opacity: 0; 
+  }
+}

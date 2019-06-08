@@ -31,9 +31,9 @@ export default class SafeCountCalculator extends Component {
     return (
       <div className="count-form-container">
         {!this.state.isLoaded ? (
-          <div>Loading</div>
+          <div className="loading">Loading</div>
         ) : this.state.error ? (
-          <div>Error: {this.state.error.message}</div>
+          <div className="error">OOPS... something went wrong!</div>
         ) : (
           <form className="count-form">
             {this.state.currency.map((den, i) => (
