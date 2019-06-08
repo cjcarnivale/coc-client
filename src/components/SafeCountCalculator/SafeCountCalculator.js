@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./SafeCountCalculator.css";
 import Config from "../../config";
-import dayjs from "dayjs"
+import dayjs from "dayjs";
 
 export default class SafeCountCalculator extends Component {
   constructor(props) {
@@ -48,8 +48,8 @@ export default class SafeCountCalculator extends Component {
       0
     );
 
-    let date = Date.now(); 
-    date = dayjs(date).format('MM/DD/YYYY');
+    let date = Date.now();
+    date = dayjs(date).format("MM/DD/YYYY");
 
     return (
       <div className="count-form-container">

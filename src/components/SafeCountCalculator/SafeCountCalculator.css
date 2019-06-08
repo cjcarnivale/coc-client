@@ -1,50 +1,52 @@
-.count-form-container{
-  margin-top: 30px; 
+.count-form-container {
+  margin-top: 30px;
 }
 
 .count-form span {
-  display: inline-block; 
+  display: inline-block;
   width: 100px;
-  text-align: left;   
+  text-align: left;
 }
 
-.count-form input{
-  margin-right: 10px; 
-  width: 50px; 
+.count-form input {
+  margin-right: 10px;
+  width: 50px;
 }
 
-.count-form button{ 
-  margin-top: 20px; 
+.count-form button {
+  margin-top: 20px;
 }
 
-.grand-total{
-  margin-top: 20px;  
+.grand-total {
+  margin-top: 20px;
 }
 
-.count-form{
-  margin: 0 auto; 
-  text-align: center; 
-  border: 1px solid black; 
+.count-form {
+  margin: 0 auto;
+  text-align: center;
+  border: 1px solid black;
   padding: 20px;
   border-radius: 10px;
-  width: 500px;   
+  width: 500px;
 }
 
-.error, .loading, .date-display{
-  text-align: center; 
+.error,
+.loading,
+.date-display {
+  text-align: center;
 }
 
 .error {
-  color: red; 
-  font-size: 2em; 
+  color: red;
+  font-size: 2em;
 }
 
 .loading {
   animation: blinker 1s linear infinite;
 }
 
-@keyframes blinker{
-  50%{
-    opacity: 0; 
+@keyframes blinker {
+  50% {
+    opacity: 0;
   }
 }
