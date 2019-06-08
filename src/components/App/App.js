@@ -1,5 +1,5 @@
-import React from "react";
-import Dashboard from "../../routes/Dashboard/Dashboard.Route";
+import React from 'react';
+import Dashboard from '../../routes/Dashboard/Dashboard.Route';
 
 function App() {
   return (
