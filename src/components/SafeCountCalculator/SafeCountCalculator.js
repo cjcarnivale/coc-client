@@ -41,6 +41,31 @@ export default class SafeCountCalculator extends Component {
     });
   };
 
+  postSafeCount = date => {
+    this.toggleConfirmSubmit();
+    date = dayjs(date).format("YYYY-MM-DD");
+    const newSafeCount = {
+      date,
+      quarters: this.state.currency[0].count,
+      dimes: this.state.currency[1].count,
+      nickles: this.state.currency[2].count,
+      pennies: this.state.currency[3].count,
+      ones: this.state.currency[4].count,
+      fives: this.state.currency[5].count,
+      tens: this.state.currency[6].count,
+      twenties: this.state.currency[7].count,
+      fifties: this.state.currency[8].count,
+      hundreds: this.state.currency[9].count
+    };
+    fetch(`${Config.API_ENDPOINT}/safecounts`, {
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      body: JSON.stringify(newSafeCount)
+    });
+  };
+
   render() {
     const gTotal = this.state.currency.reduce(
       (accumulator, currentValue) =>
@@ -93,7 +118,12 @@ export default class SafeCountCalculator extends Component {
                 </div>
               ) : (
                 <div>
-                  <button type="submit">Confirm</button>
+                  <button
+                    type="button"
+                    onClick={() => this.postSafeCount(date)}
+                  >
+                    Confirm
+                  </button>
                   <button type="button" onClick={this.toggleConfirmSubmit}>
                     Cancel
                   </button>
@@ -107,6 +137,9 @@ export default class SafeCountCalculator extends Component {
   }
 
   componentDidMount() {
+    if (this.state.isLoaded) {
+    }
+
     fetch(`${Config.API_ENDPOINT}/denominations`)
       .then(res => res.json())
       .then(
