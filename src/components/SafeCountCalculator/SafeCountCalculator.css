@@ -32,7 +32,8 @@
 
 .error,
 .loading,
-.date-display {
+.date-display,
+.already-entered {
   text-align: center;
 }
 

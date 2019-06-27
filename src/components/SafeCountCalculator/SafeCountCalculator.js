@@ -7,10 +7,12 @@ export default class SafeCountCalculator extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      date: dayjs(Date.now()).format("MM/DD/YYYY"),
       currency: [],
       isLoaded: false,
       error: null,
-      confirmSubmit: false
+      confirmSubmit: false,
+      currentDayEntered: false
     };
   }
 
@@ -45,7 +47,7 @@ export default class SafeCountCalculator extends Component {
     this.toggleConfirmSubmit();
     date = dayjs(date).format("YYYY-MM-DD");
     const newSafeCount = {
-      date,
+      date: this.state.date,
       quarters: this.state.currency[0].count,
       dimes: this.state.currency[1].count,
       nickles: this.state.currency[2].count,
@@ -63,7 +65,11 @@ export default class SafeCountCalculator extends Component {
       },
       method: "POST",
       body: JSON.stringify(newSafeCount)
-    });
+    }).then(
+      this.setState({
+        currentDayEntered: true
+      })
+    );
   };
 
   render() {
@@ -73,18 +79,19 @@ export default class SafeCountCalculator extends Component {
       0
     );
 
-    let date = Date.now();
-    date = dayjs(date).format("MM/DD/YYYY");
-
     return (
       <div className="count-form-container">
         {!this.state.isLoaded ? (
           <div className="loading">Loading</div>
         ) : this.state.error ? (
           <div className="error">OOPS... something went wrong!</div>
+        ) : this.state.currentDayEntered ? (
+          <div className="already-entered">
+            You have entered a safe count for today!
+          </div>
         ) : (
           <div>
-            <div className="date-display">Date: {date}</div>
+            <div className="date-display">Date: {this.state.date}</div>
             <form className="count-form">
               {this.state.currency.map((den, i) => (
                 <div className="currency-item" key={i}>
@@ -118,10 +125,7 @@ export default class SafeCountCalculator extends Component {
                 </div>
               ) : (
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => this.postSafeCount(date)}
-                  >
+                  <button type="button" onClick={this.postSafeCount}>
                     Confirm
                   </button>
                   <button type="button" onClick={this.toggleConfirmSubmit}>
@@ -137,24 +141,48 @@ export default class SafeCountCalculator extends Component {
   }
 
   componentDidMount() {
-    if (this.state.isLoaded) {
-    }
-
-    fetch(`${Config.API_ENDPOINT}/denominations`)
+    fetch(
+      `${Config.API_ENDPOINT}/safecounts/${dayjs(this.date).format(
+        "YYYY-MM-DD"
+      )}`
+    )
       .then(res => res.json())
-      .then(
-        result => {
+      .then(resJson => {
+        if (resJson.error === `Safe count for that day doesn't exist`) {
+          fetch(`${Config.API_ENDPOINT}/denominations`)
+            .then(res => res.json())
+            .then(
+              result => {
+                this.setState({
+                  isLoaded: true,
+                  currency: result
+                });
+              },
+              error => {
+                this.setState({
+                  isLoaded: true,
+                  error
+                });
+              }
+            );
+        } else {
           this.setState({
-            isLoaded: true,
-            currency: result
-          });
-        },
-        error => {
-          this.setState({
-            isLoaded: true,
-            error
+            currentDayEntered: true,
+            isLoaded: true
           });
         }
-      );
+      })
+      .then(
+      result => {
+        this.setState({
+          isLoaded: true
+        })
+      },
+      error => {
+        this.setState({
+          isLoaded: true,
+          error
+        });
+      });
   }
 }
