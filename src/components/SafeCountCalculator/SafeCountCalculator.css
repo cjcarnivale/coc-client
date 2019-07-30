@@ -51,6 +51,15 @@
   color: red; 
 }
 
+.already-entered {
+  color: green; 
+}
+
+.history-link{
+  display: block; 
+  margin-top: 20px; 
+}
+
 @keyframes blinker {
   50% {
     opacity: 0;

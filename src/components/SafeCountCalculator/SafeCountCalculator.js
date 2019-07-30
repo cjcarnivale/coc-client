@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from 'react-router-dom'; 
 import "./SafeCountCalculator.css";
 import Config from "../../config";
 import dayjs from "dayjs";
@@ -43,7 +44,7 @@ export default class SafeCountCalculator extends Component {
     });
   };
 
-  postSafeCount = (date) => {
+  postSafeCount = date => {
     this.toggleConfirmSubmit();
     date = dayjs(date).format("YYYY-MM-DD");
     const newSafeCount = {
@@ -85,15 +86,13 @@ export default class SafeCountCalculator extends Component {
           <div className="loading">Loading</div>
         ) : this.state.error ? (
           <div className="error">OOPS... something went wrong!</div>
-        ) : this.state.currentDayEntered ? (
-          <div className="already-entered">
-            You have entered a safe count for today!
-          </div>
         ) : (
           <div>
-            {this.state.error === 'All inputs must be numeric' && (
-              <div className="validation-error">Only use numbers when inputting counts!</div>
-            )} 
+            {this.state.error === "All inputs must be numeric" && (
+              <div className="validation-error">
+                Only use numbers when inputting counts!
+              </div>
+            )}
             <div className="date-display">Date: {this.state.date}</div>
             <form className="count-form">
               {this.state.currency.map((den, i) => (
@@ -117,7 +116,12 @@ export default class SafeCountCalculator extends Component {
                   </div>
                 )}
               </div>
-              {!this.state.confirmSubmit ? (
+              {this.state.currentDayEntered ? (
+                <div className="already-entered">
+                  You have entered a safe count for today!
+                </div>
+              ) :
+              !this.state.confirmSubmit ? (
                 <div>
                   <button type="button" onClick={this.toggleConfirmSubmit}>
                     Submit Count
@@ -136,6 +140,9 @@ export default class SafeCountCalculator extends Component {
                   </button>
                 </div>
               )}
+              <Link className="history-link" to='/safecounthistory'>
+                Safe Count History
+              </Link>
             </form>
           </div>
         )}
@@ -176,16 +183,17 @@ export default class SafeCountCalculator extends Component {
         }
       })
       .then(
-      result => {
-        this.setState({
-          isLoaded: true
-        })
-      },
-      error => {
-        this.setState({
-          isLoaded: true,
-          error
-        });
-      });
+        result => {
+          this.setState({
+            isLoaded: true
+          });
+        },
+        error => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      );
   }
 }
