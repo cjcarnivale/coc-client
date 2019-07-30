@@ -43,7 +43,7 @@ export default class SafeCountCalculator extends Component {
     });
   };
 
-  postSafeCount = date => {
+  postSafeCount = (date) => {
     this.toggleConfirmSubmit();
     date = dayjs(date).format("YYYY-MM-DD");
     const newSafeCount = {
@@ -109,7 +109,7 @@ export default class SafeCountCalculator extends Component {
               <div className="grand-total">
                 Grand Total: {gTotal}
                 {gTotal !== 1750 && (
-                  <div>
+                  <div className="total-match">
                     Your count does not match what should be in the safe
                   </div>
                 )}

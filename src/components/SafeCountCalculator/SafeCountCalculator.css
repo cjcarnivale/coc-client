@@ -46,6 +46,10 @@
   animation: blinker 1s linear infinite;
 }
 
+.total-match {
+  color: red; 
+}
+
 @keyframes blinker {
   50% {
     opacity: 0;
