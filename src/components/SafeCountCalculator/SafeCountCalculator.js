@@ -91,6 +91,9 @@ export default class SafeCountCalculator extends Component {
           </div>
         ) : (
           <div>
+            {this.state.error === 'All inputs must be numeric' && (
+              <div className="validation-error">Only use numbers when inputting counts!</div>
+            )} 
             <div className="date-display">Date: {this.state.date}</div>
             <form className="count-form">
               {this.state.currency.map((den, i) => (

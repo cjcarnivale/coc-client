@@ -46,7 +46,8 @@
   animation: blinker 1s linear infinite;
 }
 
-.total-match {
+.total-match, 
+.validation-error {
   color: red; 
 }
 
