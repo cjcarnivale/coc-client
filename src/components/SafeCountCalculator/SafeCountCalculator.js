@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { Link } from 'react-router-dom'; 
 import "./SafeCountCalculator.css";
-import Config from "../../config";
+import Config from '../../config'
+import FetchService from '../../services/fetch-service'
 import dayjs from "dayjs";
 
 export default class SafeCountCalculator extends Component {
@@ -151,16 +152,12 @@ export default class SafeCountCalculator extends Component {
   }
 
   componentDidMount() {
-    fetch(
-      `${Config.API_ENDPOINT}/safecounts/${dayjs(this.date).format(
-        "YYYY-MM-DD"
-      )}`
-    )
-      .then(res => res.json())
+    FetchService.getSafeCount(dayjs(this.state.date).format(
+      "YYYY-MM-DD"
+    ))
       .then(resJson => {
         if (resJson.error === `Safe count for that day doesn't exist`) {
-          fetch(`${Config.API_ENDPOINT}/denominations`)
-            .then(res => res.json())
+          FetchService.getDenominations()
             .then(
               result => {
                 this.setState({
