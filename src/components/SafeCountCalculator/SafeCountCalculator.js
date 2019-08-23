@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import { Link } from 'react-router-dom'; 
+import { Link } from "react-router-dom";
 import "./SafeCountCalculator.css";
-import Config from '../../config'
-import FetchService from '../../services/fetch-service'
+import FetchService from "../../services/fetch-service";
 import dayjs from "dayjs";
 
 export default class SafeCountCalculator extends Component {
@@ -45,33 +44,32 @@ export default class SafeCountCalculator extends Component {
     });
   };
 
-  postSafeCount = date => {
+  postSafeCount = () => {
     this.toggleConfirmSubmit();
-    date = dayjs(date).format("YYYY-MM-DD");
     const newSafeCount = {
-      date: this.state.date,
-      quarters: this.state.currency[0].count,
-      dimes: this.state.currency[1].count,
-      nickles: this.state.currency[2].count,
-      pennies: this.state.currency[3].count,
-      ones: this.state.currency[4].count,
-      fives: this.state.currency[5].count,
-      tens: this.state.currency[6].count,
-      twenties: this.state.currency[7].count,
-      fifties: this.state.currency[8].count,
-      hundreds: this.state.currency[9].count
+      date: dayjs(this.state.date).format("YYYY-MM-DD")
     };
-    fetch(`${Config.API_ENDPOINT}/safecounts`, {
-      headers: {
-        "content-type": "application/json"
-      },
-      method: "POST",
-      body: JSON.stringify(newSafeCount)
-    }).then(
+
+    for (let i = 0; i < this.state.currency.length; i++) {
+      Object.assign(newSafeCount, {
+        [this.state.currency[i].name.toLowerCase()]: this.state.currency[i]
+          .count
+      });
+    }
+
+    FetchService.postSafeCount(newSafeCount).then(
       this.setState({
+        isLoaded: true, 
         currentDayEntered: true
-      })
+      }),
+      error => {
+        this.setState({
+          isLoaded: true,
+          error
+        });
+      }
     );
+    this.resetCounts(); 
   };
 
   render() {
@@ -121,14 +119,10 @@ export default class SafeCountCalculator extends Component {
                 <div className="already-entered">
                   You have entered a safe count for today!
                 </div>
-              ) :
-              !this.state.confirmSubmit ? (
+              ) : !this.state.confirmSubmit ? (
                 <div>
                   <button type="button" onClick={this.toggleConfirmSubmit}>
                     Submit Count
-                  </button>
-                  <button type="button" onClick={this.resetCounts}>
-                    Reset
                   </button>
                 </div>
               ) : (
@@ -141,7 +135,10 @@ export default class SafeCountCalculator extends Component {
                   </button>
                 </div>
               )}
-              <Link className="history-link" to='/safecounthistory'>
+              <button type="button" onClick={this.resetCounts}>
+                Reset
+              </button>
+              <Link className="history-link" to="/safecounthistory">
                 Safe Count History
               </Link>
             </form>
@@ -152,45 +149,35 @@ export default class SafeCountCalculator extends Component {
   }
 
   componentDidMount() {
-    FetchService.getSafeCount(dayjs(this.state.date).format(
-      "YYYY-MM-DD"
-    ))
-      .then(resJson => {
-        if (resJson.error === `Safe count for that day doesn't exist`) {
-          FetchService.getDenominations()
-            .then(
-              result => {
-                this.setState({
-                  isLoaded: true,
-                  currency: result
-                });
-              },
-              error => {
-                this.setState({
-                  isLoaded: true,
-                  error
-                });
-              }
-            );
-        } else {
-          this.setState({
-            currentDayEntered: true,
-            isLoaded: true
-          });
-        }
-      })
-      .then(
-        result => {
-          this.setState({
-            isLoaded: true
-          });
-        },
-        error => {
+    function getSafeCountAndDenominations(date) {
+      return Promise.all([
+        FetchService.getSafeCount(date),
+        FetchService.getDenominations()
+      ]);
+    }
+    getSafeCountAndDenominations(
+      dayjs(this.state.date).format("YYYY-MM-DD")
+    ).then(
+      ([todayEntered, denominations]) => {
+        if (todayEntered.error === `Safe count for that day doesn't exist`) {
           this.setState({
             isLoaded: true,
-            error
+            currency: denominations
+          });
+        } else {
+          this.setState({
+            isLoaded: true,
+            currency: denominations,
+            currentDayEntered: true
           });
         }
-      );
+      },
+      error => {
+        this.setState({
+          isLoaded: true,
+          error
+        });
+      }
+    );
   }
 }

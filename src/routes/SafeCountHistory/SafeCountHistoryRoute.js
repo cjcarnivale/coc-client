@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import FetchService from "../../services/fetch-service"
+import FetchService from "../../services/fetch-service";
 export default class SafeCountHistoryRoute extends Component {
   constructor(props) {
     super(props);
@@ -12,11 +12,11 @@ export default class SafeCountHistoryRoute extends Component {
     };
   }
 
-  toggleEditItem = (i) => {
+  toggleEditItem = i => {
     this.setState({
       editing: i
-    }); 
-  }
+    });
+  };
 
   render() {
     return (
@@ -28,25 +28,42 @@ export default class SafeCountHistoryRoute extends Component {
         ) : (
           <div className="history-list">
             <h1>Safe Count History</h1>
-            {this.state.counts.map((count, i) => (
-              this.state.editing === i ?
-              (<div key={i}>
-                <span>{count.id.slice(4, 16)}</span>
-                {this.state.denominations.map((den, i) => ( 
-                  <span key={i}>{den.name}: <input type="number" min="0" defaultValue={count[den.name.toLowerCase()]} /></span>
-                ))}
-                <button type='button' onClick={() => this.toggleEditItem(null)}>Cancel</button>
-              </div>)
-              :
-              (<div className="daily-count" key={i}>
-                <span>{count.id.slice(4, 16)}</span>
-                {this.state.denominations.map((den, i) => (
-                  <span key={i}>{den.name}: {count[den.name.toLowerCase()]}</span>
-                ))}
-                <button type="button" onClick={() => this.toggleEditItem(i)}>Edit</button>
-                <button type="button">Delete</button>
-              </div>)
-            ))}
+            {this.state.counts.map((count, i) =>
+              this.state.editing === i ? (
+                <div key={i}>
+                  <span>{count.id.slice(4, 16)}</span>
+                  {this.state.denominations.map((den, i) => (
+                    <span key={i}>
+                      {den.name}:{" "}
+                      <input
+                        type="number"
+                        min="0"
+                        defaultValue={count[den.name.toLowerCase()]}
+                      />
+                    </span>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => this.toggleEditItem(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="daily-count" key={i}>
+                  <span>{count.id.slice(4, 16)}</span>
+                  {this.state.denominations.map((den, i) => (
+                    <span key={i}>
+                      {den.name}: {count[den.name.toLowerCase()]}
+                    </span>
+                  ))}
+                  <button type="button" onClick={() => this.toggleEditItem(i)}>
+                    Edit
+                  </button>
+                  <button type="button">Delete</button>
+                </div>
+              )
+            )}
           </div>
         )}
       </div>
@@ -55,22 +72,25 @@ export default class SafeCountHistoryRoute extends Component {
 
   componentDidMount() {
     function getSafeCountsAndDenominations() {
-      return Promise.all([FetchService.getAllSafeCounts(), FetchService.getDenominations()])
+      return Promise.all([
+        FetchService.getAllSafeCounts(),
+        FetchService.getDenominations()
+      ]);
     }
-    getSafeCountsAndDenominations()
-      .then(([counts, denominations]) => {
-          this.setState({
-            isLoaded: true,
-            denominations,
-            counts
-          });
-        },
-        error => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      );
+    getSafeCountsAndDenominations().then(
+      ([counts, denominations]) => {
+        this.setState({
+          isLoaded: true,
+          denominations,
+          counts
+        });
+      },
+      error => {
+        this.setState({
+          isLoaded: true,
+          error
+        });
+      }
+    );
   }
 }
