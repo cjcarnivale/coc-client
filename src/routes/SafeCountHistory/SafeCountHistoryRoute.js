@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import FetchService from "../../services/fetch-service";
+import dayjs from "dayjs"; 
 export default class SafeCountHistoryRoute extends Component {
   constructor(props) {
     super(props);
@@ -12,11 +13,44 @@ export default class SafeCountHistoryRoute extends Component {
     };
   }
 
-  toggleEditItem = i => {
+  toggleEditItem = (i) => {
     this.setState({
       editing: i
     });
   };
+
+  updateCount = (i, e, den) => {
+    console.log(this.state.counts[i][den.name])
+    const counts = [...this.state.counts]
+    counts[i][den.name] = e.targetvalue
+    this.setState({
+      counts
+    })
+  }
+
+  postUpdate = (date) => {
+
+  }
+
+  resetCount = (date, i) => {
+    date = dayjs(date).format("YYYY-MM-DD") 
+    FetchService.getSafeCount(date)
+    .then(count => {
+      let copy = [...this.state.counts];
+      copy[i] = count[0];
+      this.setState({
+        isLoaded: true,
+        counts: copy
+      })
+    }, 
+    error => {
+      this.setState({
+        isLoaded: true,
+        error
+      });
+    }
+    )
+  }
 
   render() {
     return (
@@ -38,13 +72,17 @@ export default class SafeCountHistoryRoute extends Component {
                       <input
                         type="number"
                         min="0"
-                        defaultValue={count[den.name.toLowerCase()]}
+                        value={count[den.name.toLowerCase()]}
+                        onChange={e => this.updateCount(i, e, den)}
                       />
                     </span>
                   ))}
+                  <button type="button" onClick={() => this.postUpdate(count.id.slice(4, 16))}>
+                    Submit
+                  </button>
                   <button
                     type="button"
-                    onClick={() => this.toggleEditItem(null)}
+                    onClick={() => {this.toggleEditItem(null); this.resetCount(count.id.slice(4, 16), i)}}
                   >
                     Cancel
                   </button>

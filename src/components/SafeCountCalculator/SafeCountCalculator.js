@@ -57,19 +57,30 @@ export default class SafeCountCalculator extends Component {
       });
     }
 
-    FetchService.postSafeCount(newSafeCount).then(
-      this.setState({
-        isLoaded: true, 
-        currentDayEntered: true
-      }),
-      error => {
-        this.setState({
-          isLoaded: true,
-          error
-        });
-      }
-    );
-    this.resetCounts(); 
+    FetchService.postSafeCount(newSafeCount).then(res => {
+      return !res.ok
+        ? res.json().then(resJson =>
+            this.setState({
+              error: resJson.error,
+              isLoaded: true
+            })
+          )
+        : res.json().then(
+            this.setState({
+              isLoaded: true,
+              currentDayEntered: true,
+              error: null
+            }),
+            error => {
+              this.setState({
+                isLoaded: true,
+                error
+              });
+            }
+          );
+    });
+
+    this.resetCounts();
   };
 
   render() {
@@ -83,21 +94,21 @@ export default class SafeCountCalculator extends Component {
       <div className="count-form-container">
         {!this.state.isLoaded ? (
           <div className="loading">Loading</div>
-        ) : this.state.error ? (
-          <div className="error">OOPS... something went wrong!</div>
+        ) : typeof this.state.error !== "string" &&
+          this.state.error !== null ? (
+          <div className="error">OOPS... Something went wrong!</div>
         ) : (
           <div>
-            {this.state.error === "All inputs must be numeric" && (
-              <div className="validation-error">
-                Only use numbers when inputting counts!
-              </div>
-            )}
             <div className="date-display">Date: {this.state.date}</div>
             <form className="count-form">
+              {this.state.error && (
+                <div className="validation-error">{this.state.error}</div>
+              )}
               {this.state.currency.map((den, i) => (
                 <div className="currency-item" key={i}>
                   <span>{den.name}</span>
                   <input
+                    step="1"
                     type="number"
                     min="0"
                     value={this.state.currency[i].count}
@@ -107,8 +118,11 @@ export default class SafeCountCalculator extends Component {
                   <span>Total: $ {den.count * den.multiplier}</span>
                 </div>
               ))}
+              <button type="button" onClick={this.resetCounts}>
+                Reset
+              </button>
               <div className="grand-total">
-                Grand Total: {gTotal}
+                Grand Total: $ {gTotal}
                 {gTotal !== 1750 && (
                   <div className="total-match">
                     Your count does not match what should be in the safe
@@ -135,9 +149,7 @@ export default class SafeCountCalculator extends Component {
                   </button>
                 </div>
               )}
-              <button type="button" onClick={this.resetCounts}>
-                Reset
-              </button>
+
               <Link className="history-link" to="/safecounthistory">
                 Safe Count History
               </Link>
