@@ -70,6 +70,26 @@ export default class SafeCountHistoryRoute extends Component {
     this.toggleEditItem(null);
   };
 
+  deleteCount = (date) => {
+    date = dayjs(date).format("YYYY-MM-DD"); 
+    FetchService.deleteSafeCount(date).then(
+      () => {
+        FetchService.getAllSafeCounts().then(counts => {
+          this.setState({
+            counts,
+            isLoaded: true
+          })
+        })
+      },
+      error => {
+        this.setState({
+          isLoaded:true,
+          error
+        })
+      }
+    ) 
+  }; 
+
   resetCount = (date, i) => {
     date = dayjs(date).format("YYYY-MM-DD");
     FetchService.getSafeCount(date).then(
@@ -146,7 +166,9 @@ export default class SafeCountHistoryRoute extends Component {
                   <button type="button" onClick={() => this.toggleEditItem(i)}>
                     Edit
                   </button>
-                  <button type="button">Delete</button>
+                  <button type="button" onClick={() => this.deleteCount(this.state.counts[i].id.slice(4, 16))}>
+                    Delete
+                  </button>
                 </div>
               )
             )}

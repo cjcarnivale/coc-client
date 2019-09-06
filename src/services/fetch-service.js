@@ -34,6 +34,12 @@ const FetchService = {
       },
       body: JSON.stringify(newSafeCount)
     })
+  },
+
+  deleteSafeCount(day) {
+    return fetch(`${Config.API_ENDPOINT}/safecounts/${day}`, {
+      method: "DELETE"
+    })
   }
 }
 
