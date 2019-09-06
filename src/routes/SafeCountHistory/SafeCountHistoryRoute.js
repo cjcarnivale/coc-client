@@ -9,7 +9,8 @@ export default class SafeCountHistoryRoute extends Component {
       counts: [],
       isLoaded: false,
       error: null,
-      editing: null
+      editing: null,
+      add: false
     };
   }
 
@@ -88,8 +89,12 @@ export default class SafeCountHistoryRoute extends Component {
         })
       }
     ) 
-  }; 
+  };
 
+  addCount = () => {
+    
+  }
+  
   resetCount = (date, i) => {
     date = dayjs(date).format("YYYY-MM-DD");
     FetchService.getSafeCount(date).then(
@@ -124,6 +129,9 @@ export default class SafeCountHistoryRoute extends Component {
             {this.state.error && (
               <div className="validation-error">{this.state.error}</div>
             )}
+            <button type="button" onClick={this.addSafeCount}>
+              Add Safe Count
+            </button>
             {this.state.counts.map((count, i) =>
               this.state.editing === i ? (
                 <div key={i}>
