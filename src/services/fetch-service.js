@@ -24,6 +24,16 @@ const FetchService = {
               method: "POST",
               body: JSON.stringify(newSafeCount)
         })
+  },
+
+  updateSafeCount(newSafeCount, day) {
+    return fetch(`${Config.API_ENDPOINT}/safecounts/${day}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(newSafeCount)
+    })
   }
 }
 
