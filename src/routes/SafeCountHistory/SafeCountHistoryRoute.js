@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import FetchService from "../../services/fetch-service";
 import dayjs from "dayjs";
+import { Link } from "react-router-dom"; 
 export default class SafeCountHistoryRoute extends Component {
   constructor(props) {
     super(props);
@@ -129,9 +130,13 @@ export default class SafeCountHistoryRoute extends Component {
             {this.state.error && (
               <div className="validation-error">{this.state.error}</div>
             )}
-            <button type="button" onClick={this.addSafeCount}>
+            <Link to={{pathname:"/addsafecount", 
+                      state: {
+                        manual: true
+                      }
+            }}>
               Add Safe Count
-            </button>
+            </Link>
             {this.state.counts.map((count, i) =>
               this.state.editing === i ? (
                 <div key={i}>

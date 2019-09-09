@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import SafeCountCalculator from "../../components/SafeCountCalculator/SafeCountCalculator";
+import Calculator from "../../components/Calculator/Calculator";
 import "./DashboardRoute.css";
 
 export default class Dashboard extends Component {
@@ -7,7 +7,7 @@ export default class Dashboard extends Component {
     return (
       <div>
         <h2 className="scc-heading">Safe Count</h2>
-        <SafeCountCalculator />
+        <Calculator />
       </div>
     );
   }
