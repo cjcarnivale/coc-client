@@ -10,12 +10,18 @@ export default withRouter(
     constructor(props) {
       super(props);
       this.state = {
-        date: null,
-        currency: [],
+        date: dayjs(Date.now()).format("MM/DD/YYYY"),
+        currency: [{null: null}],
         isLoaded: false,
         error: null,
         confirmSubmit: false,
-        currentDayEntered: false
+        currentDayEntered: false,
+        gTotal: () => { return this.state.currency.reduce(
+          (accumulator, currentValue) =>
+            accumulator +
+            currentValue.count * currentValue.multiplier,
+          0
+        )}
       };
     }
 
@@ -100,12 +106,6 @@ export default withRouter(
     };
 
     render() {
-      const gTotal = this.state.currency.reduce(
-        (accumulator, currentValue) =>
-          accumulator + currentValue.count * currentValue.multiplier,
-        0
-      );
-
       return (
         <div className="count-form-container">
           {!this.state.isLoaded ? (
@@ -118,7 +118,7 @@ export default withRouter(
               <div className="date-display">
                 Date:{" "}
                 {this.props.manual ? (
-                  <input type="date" onChange={e => this.updateDate(e)} />
+                  <input type="date" value={dayjs(this.state.date).format("YYYY-MM-DD")} onChange={e => this.updateDate(e)} />
                 ) : (
                   this.state.date
                 )}
@@ -145,8 +145,9 @@ export default withRouter(
                   Reset
                 </button>
                 <div className="grand-total">
-                  Grand Total: $ {gTotal}
-                  {gTotal !== 1750 && (
+                  Grand Total: ${" "}
+                  {this.state.gTotal()}
+                  {this.state.gTotal() !== 1750 && (
                     <div className="total-match">
                       Your count does not match what should be in the safe
                     </div>
@@ -213,14 +214,7 @@ export default withRouter(
               error
             });
           }
-        )
-        .then(() => {
-          if (!this.props.manual) {
-            this.setState({
-              date: dayjs(Date.now()).format("MM/DD/YYYY")
-            });
-          }
-        });
+        );      
     }
   }
 );

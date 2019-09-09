@@ -125,59 +125,62 @@ export default class History extends Component {
             {this.state.error && (
               <div className="validation-error">{this.state.error}</div>
             )}
-            {this.state.counts.map((count, i) =>
-              this.state.editing === i ? (
-                <div key={i}>
-                  <span>{count.id.slice(4, 16)}</span>
-                  {this.state.denominations.map((den, i) => (
-                    <span key={i}>
-                      {den.name}:{" "}
+            {this.state.counts.map((count, i) => (
+              <div key={i}>
+                <span>{count.id.slice(4, 16)}</span>
+                {this.state.denominations.map((den, j) => (
+                  <span key={j}>
+                    {den.name}:{" "}
+                    {this.state.editing === i ? (
                       <input
                         type="number"
                         min="0"
                         value={count[den.name.toLowerCase()]}
                         onChange={e => this.updateCount(e, den.name)}
                       />
-                    </span>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => this.postUpdate(count.id.slice(4, 16))}
-                  >
-                    Submit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      this.toggleEditItem(null);
-                      this.resetCount(count.id.slice(4, 16), i);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="daily-count" key={i}>
-                  <span>{count.id.slice(4, 16)}</span>
-                  {this.state.denominations.map((den, i) => (
-                    <span key={i}>
-                      {den.name}: {count[den.name.toLowerCase()]}
-                    </span>
-                  ))}
-                  <button type="button" onClick={() => this.toggleEditItem(i)}>
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      this.deleteCount(this.state.counts[i].id.slice(4, 16))
-                    }
-                  >
-                    Delete
-                  </button>
-                </div>
-              )
-            )}
+                    ) : (
+                      `${den.name}: ${count[den.name.toLowerCase()]}`
+                    )}
+                  </span>
+                ))}
+                {this.state.editing === i ? (
+                  <span>
+                    <button
+                      type="button"
+                      onClick={() => this.postUpdate(count.id.slice(4, 16))}
+                    >
+                      Submit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        this.toggleEditItem(null);
+                        this.resetCount(count.id.slice(4, 16), i);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </span>
+                ) : (
+                  <span>
+                    <button
+                      type="button"
+                      onClick={() => this.toggleEditItem(i)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        this.deleteCount(this.state.counts[i].id.slice(4, 16))
+                      }
+                    >
+                      Delete
+                    </button>
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
