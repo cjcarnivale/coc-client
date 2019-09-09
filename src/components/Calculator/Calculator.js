@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
 import "./Calculator.css";
-import FetchService from "../../services/fetch-service";
+import SafeCountService from "../../services/safe-count-service";
+import DenominationsService from "../../services/denominations-service";
 import dayjs from "dayjs";
 
 export default withRouter(
-  class SafeCountCalculator extends Component {
+  class Calculator extends Component {
     constructor(props) {
       super(props);
       this.state = {
@@ -65,7 +66,7 @@ export default withRouter(
         });
       }
 
-      FetchService.postSafeCount(newSafeCount).then(res => {
+      SafeCountService.postSafeCount(newSafeCount).then(res => {
         return !res.ok
           ? res.json().then(resJson =>
               this.setState({
@@ -90,7 +91,6 @@ export default withRouter(
               )
               .then(() => {
                 if (this.props.manual) {
-                  console.log(this.props.manual)
                   this.props.history.push("/safecounthistory");
                 }
               });
@@ -152,13 +152,11 @@ export default withRouter(
                     </div>
                   )}
                 </div>
-                {(this.state.currentDayEntered && !this.props.manual) 
-                ? (
+                {this.state.currentDayEntered && !this.props.manual ? (
                   <div className="already-entered">
                     You have entered a safe count for today!
                   </div>
-                ):
-                !this.state.confirmSubmit ? (
+                ) : !this.state.confirmSubmit ? (
                   <div>
                     <button type="button" onClick={this.toggleConfirmSubmit}>
                       Submit Count
@@ -187,41 +185,42 @@ export default withRouter(
     componentDidMount() {
       function getSafeCountAndDenominations(date) {
         return Promise.all([
-          FetchService.getSafeCount(date),
-          FetchService.getDenominations()
+          SafeCountService.getSafeCount(date),
+          DenominationsService.getDenominations()
         ]);
       }
-      getSafeCountAndDenominations(
-        dayjs(this.state.date).format("YYYY-MM-DD")
-      ).then(
-        ([todayEntered, denominations]) => {
-          if (todayEntered.error === `Safe count for that day doesn't exist`) {
+      getSafeCountAndDenominations(dayjs(this.state.date).format("YYYY-MM-DD"))
+        .then(
+          ([todayEntered, denominations]) => {
+            if (
+              todayEntered.error === `Safe count for that day doesn't exist`
+            ) {
+              this.setState({
+                isLoaded: true,
+                currency: denominations
+              });
+            } else {
+              this.setState({
+                isLoaded: true,
+                currency: denominations,
+                currentDayEntered: true
+              });
+            }
+          },
+          error => {
             this.setState({
               isLoaded: true,
-              currency: denominations
-            });
-          } else {
-            this.setState({
-              isLoaded: true,
-              currency: denominations,
-              currentDayEntered: true
+              error
             });
           }
-        },
-        error => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      )
-      .then(() => {
-        if (!this.props.manual){
-          this.setState({
-            date: dayjs(Date.now()).format("MM/DD/YYYY")
-          })
-        }
-      })
+        )
+        .then(() => {
+          if (!this.props.manual) {
+            this.setState({
+              date: dayjs(Date.now()).format("MM/DD/YYYY")
+            });
+          }
+        });
     }
   }
 );
