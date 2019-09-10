@@ -11,17 +11,18 @@ export default withRouter(
       super(props);
       this.state = {
         date: dayjs(Date.now()).format("MM/DD/YYYY"),
-        currency: [{null: null}],
+        currency: [],
         isLoaded: false,
         error: null,
         confirmSubmit: false,
         currentDayEntered: false,
-        gTotal: () => { return this.state.currency.reduce(
-          (accumulator, currentValue) =>
-            accumulator +
-            currentValue.count * currentValue.multiplier,
-          0
-        )}
+        gTotal: () => {
+          return this.state.currency.reduce(
+            (accumulator, currentValue) =>
+              accumulator + currentValue.count * currentValue.multiplier,
+            0
+          );
+        }
       };
     }
 
@@ -118,7 +119,11 @@ export default withRouter(
               <div className="date-display">
                 Date:{" "}
                 {this.props.manual ? (
-                  <input type="date" value={dayjs(this.state.date).format("YYYY-MM-DD")} onChange={e => this.updateDate(e)} />
+                  <input
+                    type="date"
+                    value={dayjs(this.state.date).format("YYYY-MM-DD")}
+                    onChange={e => this.updateDate(e)}
+                  />
                 ) : (
                   this.state.date
                 )}
@@ -137,7 +142,15 @@ export default withRouter(
                       value={this.state.currency[i].count}
                       onChange={e => this.updateCount(i, e)}
                     />
-                    <span>{i < 4 ? "roll(s)" : "bill(s)"}</span>
+                    <span>
+                      {i < 4
+                        ? den.count !== "1"
+                          ? "rolls"
+                          : "roll"
+                        : den.count !== "1"
+                        ? "bills"
+                        : "bill"}
+                    </span>
                     <span>Total: $ {den.count * den.multiplier}</span>
                   </div>
                 ))}
@@ -145,8 +158,7 @@ export default withRouter(
                   Reset
                 </button>
                 <div className="grand-total">
-                  Grand Total: ${" "}
-                  {this.state.gTotal()}
+                  Grand Total: $ {this.state.gTotal()}
                   {this.state.gTotal() !== 1750 && (
                     <div className="total-match">
                       Your count does not match what should be in the safe
@@ -190,31 +202,30 @@ export default withRouter(
           DenominationsService.getDenominations()
         ]);
       }
-      getSafeCountAndDenominations(dayjs(this.state.date).format("YYYY-MM-DD"))
-        .then(
-          ([todayEntered, denominations]) => {
-            if (
-              todayEntered.error === `Safe count for that day doesn't exist`
-            ) {
-              this.setState({
-                isLoaded: true,
-                currency: denominations
-              });
-            } else {
-              this.setState({
-                isLoaded: true,
-                currency: denominations,
-                currentDayEntered: true
-              });
-            }
-          },
-          error => {
+      getSafeCountAndDenominations(
+        dayjs(this.state.date).format("YYYY-MM-DD")
+      ).then(
+        ([todayEntered, denominations]) => {
+          if (todayEntered.error === `Safe count for that day doesn't exist`) {
             this.setState({
               isLoaded: true,
-              error
+              currency: denominations
+            });
+          } else {
+            this.setState({
+              isLoaded: true,
+              currency: denominations,
+              currentDayEntered: true
             });
           }
-        );      
+        },
+        error => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      );
     }
   }
 );

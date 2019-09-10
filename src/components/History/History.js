@@ -139,10 +139,22 @@ export default class History extends Component {
                         onChange={e => this.updateCount(e, den.name)}
                       />
                     ) : (
-                      `${den.name}: ${count[den.name.toLowerCase()]}`
+                      `${count[den.name.toLowerCase()]}`
                     )}
                   </span>
                 ))}
+                {`Total: ${this.state.denominations
+                  .map(den => den.name.toLowerCase())
+                  .map(
+                    name =>
+                      count[name] *
+                      this.state.denominations.find(
+                        den =>
+                          den.name ===
+                          `${name.charAt(0).toUpperCase()}${name.substring(1)}`
+                      ).multiplier
+                  )
+                  .reduce((acc, currentVal) => acc + currentVal, 0)}`}
                 {this.state.editing === i ? (
                   <span>
                     <button
