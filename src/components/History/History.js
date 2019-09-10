@@ -23,7 +23,7 @@ export default class History extends Component {
 
   updateCount = (e, denName) => {
     let counts = [...this.state.counts];
-    counts[this.state.editing][denName.toLowerCase()] = e.currentTarget.value;
+    counts[this.state.editing][denName] = e.currentTarget.value;
     this.setState({
       counts
     });
@@ -130,29 +130,29 @@ export default class History extends Component {
                 <span>{count.id.slice(4, 16)}</span>
                 {this.state.denominations.map((den, j) => (
                   <span key={j}>
-                    {den.name}:{" "}
+                    {`${den.name.charAt(0).toUpperCase()}${den.name.substring(
+                      1
+                    )}`}
+                    :{" "}
                     {this.state.editing === i ? (
                       <input
                         type="number"
                         min="0"
-                        value={count[den.name.toLowerCase()]}
+                        value={count[den.name]}
                         onChange={e => this.updateCount(e, den.name)}
                       />
                     ) : (
-                      `${count[den.name.toLowerCase()]}`
+                      `${count[den.name]}`
                     )}
                   </span>
                 ))}
                 {`Total: ${this.state.denominations
-                  .map(den => den.name.toLowerCase())
+                  .map(den => den.name)
                   .map(
                     name =>
                       count[name] *
-                      this.state.denominations.find(
-                        den =>
-                          den.name ===
-                          `${name.charAt(0).toUpperCase()}${name.substring(1)}`
-                      ).multiplier
+                      this.state.denominations.find(den => den.name === name)
+                        .multiplier
                   )
                   .reduce((acc, currentVal) => acc + currentVal, 0)}`}
                 {this.state.editing === i ? (

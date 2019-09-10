@@ -68,8 +68,7 @@ export default withRouter(
 
       for (let i = 0; i < this.state.currency.length; i++) {
         Object.assign(newSafeCount, {
-          [this.state.currency[i].name.toLowerCase()]: this.state.currency[i]
-            .count
+          [this.state.currency[i].name]: this.state.currency[i].count
         });
       }
 
@@ -134,7 +133,9 @@ export default withRouter(
                 )}
                 {this.state.currency.map((den, i) => (
                   <div className="currency-item" key={i}>
-                    <span>{den.name}</span>
+                    <span>{`${den.name
+                      .charAt(0)
+                      .toUpperCase()}${den.name.substring(1)}`}</span>
                     <input
                       step="1"
                       type="number"
@@ -143,13 +144,8 @@ export default withRouter(
                       onChange={e => this.updateCount(i, e)}
                     />
                     <span>
-                      {i < 4
-                        ? den.count !== "1"
-                          ? "rolls"
-                          : "roll"
-                        : den.count !== "1"
-                        ? "bills"
-                        : "bill"}
+                      {`${den.type}`}
+                      {den.count !== "1" ? "s" : ""}
                     </span>
                     <span>Total: $ {den.count * den.multiplier}</span>
                   </div>
