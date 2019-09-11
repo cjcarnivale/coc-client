@@ -110,8 +110,7 @@ export default withRouter(
         <div className="count-form-container">
           {!this.state.isLoaded ? (
             <div className="loading">Loading</div>
-          ) : typeof this.state.error !== "string" &&
-            this.state.error !== null ? (
+          ) : this.state.error === "Failed to fetch" ? (
             <div className="error">OOPS... Something went wrong!</div>
           ) : (
             <div>
@@ -201,8 +200,8 @@ export default withRouter(
       getSafeCountAndDenominations(
         dayjs(this.state.date).format("YYYY-MM-DD")
       ).then(
-        ([todayEntered, denominations]) => {
-          if (todayEntered.error === `Safe count for that day doesn't exist`) {
+        ([getCurrentDay, denominations]) => {
+          if (getCurrentDay.currentDayEntered === false) {
             this.setState({
               isLoaded: true,
               currency: denominations
@@ -211,14 +210,14 @@ export default withRouter(
             this.setState({
               isLoaded: true,
               currency: denominations,
-              currentDayEntered: true
+              currentDayEntered: getCurrentDay.currentDayEntered
             });
           }
         },
         error => {
           this.setState({
             isLoaded: true,
-            error
+            error: error.message
           });
         }
       );
