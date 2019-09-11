@@ -117,9 +117,6 @@ export default class History extends Component {
       <div className="history-list-container">
         {!this.state.isLoaded ? (
           <div className="loading">Loading</div>
-        ) : typeof this.state.error !== "string" &&
-          this.state.error !== null ? (
-          <div className="error">OOPS... Something went wrong!</div>
         ) : (
           <div className="history-list">
             {this.state.error && (
@@ -216,8 +213,8 @@ export default class History extends Component {
       },
       error => {
         this.setState({
-          isLoaded: true,
-          error
+          isLoaded: false,
+          error: error.message
         });
       }
     );

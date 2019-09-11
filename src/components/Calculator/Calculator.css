@@ -56,11 +56,6 @@
   color: green; 
 }
 
-.history-link{
-  display: block; 
-  margin-top: 20px; 
-}
-
 .validation-error {
   margin-bottom: 2em; 
 }

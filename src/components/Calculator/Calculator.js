@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import "./Calculator.css";
 import SafeCountService from "../../services/safe-count-service";
 import DenominationsService from "../../services/denominations-service";
@@ -110,8 +110,6 @@ export default withRouter(
         <div className="count-form-container">
           {!this.state.isLoaded ? (
             <div className="loading">Loading</div>
-          ) : this.state.error === "Failed to fetch" ? (
-            <div className="error">OOPS... Something went wrong!</div>
           ) : (
             <div>
               <div className="date-display">
@@ -180,9 +178,6 @@ export default withRouter(
                     </button>
                   </div>
                 )}
-                <Link className="history-link" to="/safecounthistory">
-                  Safe Count History
-                </Link>
               </form>
             </div>
           )}
@@ -216,7 +211,7 @@ export default withRouter(
         },
         error => {
           this.setState({
-            isLoaded: true,
+            isLoaded: false,
             error: error.message
           });
         }
