@@ -2,13 +2,14 @@ import React, { Component } from "react";
 import SafeCountService from "../../services/safe-count-service";
 import DenominationService from "../../services/denominations-service";
 import dayjs from "dayjs";
-
+import clonedeep from "lodash/cloneDeep";
 export default class History extends Component {
   constructor(props) {
     super(props);
     this.state = {
       denominations: [],
       counts: [],
+      updatedCounts: [],
       isLoaded: false,
       error: null,
       editing: null
@@ -16,28 +17,35 @@ export default class History extends Component {
   }
 
   toggleEditItem = i => {
-    this.setState({
-      editing: i
-    });
+      const updatedCounts = clonedeep(this.state.counts);
+      if (i === null){
+      this.setState({
+        updatedCounts: [],
+        editing: i
+      });
+    }
+    else{
+      this.setState({
+        updatedCounts,
+        editing: i
+      })
+    }
   };
 
   updateCount = (e, denName) => {
-    let counts = [...this.state.counts];
-    counts[this.state.editing][denName] = e.currentTarget.value;
+    const updatedCounts = clonedeep(this.state.updatedCounts);
+    updatedCounts[this.state.editing][denName] = e.currentTarget.value;
     this.setState({
-      counts
+      updatedCounts
     });
   };
 
   postUpdate = date => {
     date = dayjs(date).format("YYYY-MM-DD");
-    const newSafeCount = {
-      date
-    };
-    const updatedCount = this.state.counts[this.state.editing];
-    Object.assign(newSafeCount, updatedCount);
+    const updatedCount = this.state.updatedCounts[this.state.editing];
     SafeCountService.updateSafeCount(updatedCount, date).then(
       res => {
+        const updatedCount = clonedeep(this.state.updatedCounts);
         return !res.ok
           ? res
               .json()
@@ -47,61 +55,32 @@ export default class History extends Component {
                   isLoaded: true
                 })
               )
-              .then(
-                SafeCountService.getAllSafeCounts().then(counts =>
-                  this.setState({
-                    counts
-                  })
-                )
-              )
-          : SafeCountService.getAllSafeCounts().then(counts =>
-              this.setState({
-                counts,
-                isLoaded: true,
-                error: null
-              })
-            );
+          :
+            this.setState({
+              isLoaded: true, 
+              counts: updatedCount,
+              error: null
+          }, this.toggleEditItem(null))
       },
       error => {
         this.setState({
-          isLoaded: true,
-          error
+          isLoaded: false,
+          error: error.message
         });
       }
-    );
-    this.toggleEditItem(null);
+    )
   };
 
-  deleteCount = date => {
+  deleteCount = (date, i) => { 
     date = dayjs(date).format("YYYY-MM-DD");
+    const copy = clonedeep(this.state.counts);
+    copy.splice(i, 1)
     SafeCountService.deleteSafeCount(date).then(
       () => {
-        SafeCountService.getAllSafeCounts().then(counts => {
           this.setState({
-            counts,
+            counts: copy,
             isLoaded: true
           });
-        });
-      },
-      error => {
-        this.setState({
-          isLoaded: true,
-          error
-        });
-      }
-    );
-  };
-
-  resetCount = (date, i) => {
-    date = dayjs(date).format("YYYY-MM-DD");
-    SafeCountService.getSafeCount(date).then(
-      count => {
-        let copy = [...this.state.counts];
-        copy[i] = count[0];
-        this.setState({
-          isLoaded: true,
-          counts: copy
-        });
       },
       error => {
         this.setState({
@@ -135,7 +114,7 @@ export default class History extends Component {
                       <input
                         type="number"
                         min="0"
-                        value={count[den.name]}
+                        value={this.state.updatedCounts[i][den.name]}
                         onChange={e => this.updateCount(e, den.name)}
                       />
                     ) : (
@@ -164,7 +143,6 @@ export default class History extends Component {
                       type="button"
                       onClick={() => {
                         this.toggleEditItem(null);
-                        this.resetCount(count.id.slice(4, 16), i);
                       }}
                     >
                       Cancel
@@ -181,7 +159,7 @@ export default class History extends Component {
                     <button
                       type="button"
                       onClick={() =>
-                        this.deleteCount(this.state.counts[i].id.slice(4, 16))
+                        this.deleteCount(this.state.counts[i].id.slice(4, 16), i)
                       }
                     >
                       Delete

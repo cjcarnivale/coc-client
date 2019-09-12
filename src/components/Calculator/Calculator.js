@@ -4,20 +4,21 @@ import "./Calculator.css";
 import SafeCountService from "../../services/safe-count-service";
 import DenominationsService from "../../services/denominations-service";
 import dayjs from "dayjs";
+import clonedeep from "lodash/cloneDeep";
 
 export default withRouter(
   class Calculator extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        date: dayjs(Date.now()).format("MM/DD/YYYY"),
-        currency: [],
+        date: dayjs(Date.now()).format("YYYY/MM/DD"),
+        denominations: [],
         isLoaded: false,
         error: null,
         confirmSubmit: false,
         currentDayEntered: false,
         gTotal: () => {
-          return this.state.currency.reduce(
+          return this.state.denominations.reduce(
             (accumulator, currentValue) =>
               accumulator + currentValue.count * currentValue.multiplier,
             0
@@ -34,10 +35,10 @@ export default withRouter(
     };
 
     updateCount = (i, e) => {
-      const currency = [...this.state.currency];
-      currency[i].count = e.target.value;
+      let denominations = clonedeep(this.state.denominations);
+      denominations[i].count = e.target.value;
       this.setState({
-        currency
+        denominations
       });
     };
 
@@ -48,7 +49,7 @@ export default withRouter(
     };
 
     resetCounts = () => {
-      let copy = [...this.state.currency];
+      let copy = clonedeep(this.state.denominations);
       let reset = [];
       for (let i = 0; i < copy.length; i++) {
         const den = copy[i];
@@ -56,7 +57,7 @@ export default withRouter(
         reset.push(den);
       }
       this.setState({
-        currency: reset
+        denominations: reset
       });
     };
 
@@ -66,41 +67,43 @@ export default withRouter(
         date: dayjs(this.state.date).format("YYYY-MM-DD")
       };
 
-      for (let i = 0; i < this.state.currency.length; i++) {
+      for (let i = 0; i < this.state.denominations.length; i++) {
         Object.assign(newSafeCount, {
-          [this.state.currency[i].name]: this.state.currency[i].count
+          [this.state.denominations[i].name]: this.state.denominations[i].count
         });
       }
 
-      SafeCountService.postSafeCount(newSafeCount).then(res => {
-        return !res.ok
-          ? res.json().then(resJson =>
-              this.setState({
-                error: resJson.error,
-                isLoaded: true
-              })
-            )
-          : res
-              .json()
-              .then(
+      SafeCountService.postSafeCount(newSafeCount).then(
+        res => {
+          return !res.ok
+            ? res.json().then(resJson =>
                 this.setState({
-                  isLoaded: true,
-                  currentDayEntered: true,
-                  error: null
-                }),
-                error => {
+                  error: resJson.error,
+                  isLoaded: true
+                })
+              )
+            : res
+                .json()
+                .then(
                   this.setState({
                     isLoaded: true,
-                    error
-                  });
-                }
-              )
-              .then(() => {
-                if (this.props.manual) {
-                  this.props.history.push("/safecounthistory");
-                }
-              });
-      });
+                    currentDayEntered: true,
+                    error: null
+                  })
+                )
+                .then(() => {
+                  if (this.props.manual) {
+                    this.props.history.push("/safecounthistory");
+                  }
+                });
+        },
+        error => {
+          this.setState({
+            isLoaded: false,
+            error
+          });
+        }
+      );
 
       this.resetCounts();
     };
@@ -121,15 +124,15 @@ export default withRouter(
                     onChange={e => this.updateDate(e)}
                   />
                 ) : (
-                  this.state.date
+                  dayjs(this.state.date).format("MM-DD-YYYY")
                 )}
               </div>
               <form className="count-form">
                 {this.state.error && (
                   <div className="validation-error">{this.state.error}</div>
                 )}
-                {this.state.currency.map((den, i) => (
-                  <div className="currency-item" key={i}>
+                {this.state.denominations.map((den, i) => (
+                  <div className="denominations-item" key={i}>
                     <span>{`${den.name
                       .charAt(0)
                       .toUpperCase()}${den.name.substring(1)}`}</span>
@@ -137,7 +140,7 @@ export default withRouter(
                       step="1"
                       type="number"
                       min="0"
-                      value={this.state.currency[i].count}
+                      value={this.state.denominations[i].count}
                       onChange={e => this.updateCount(i, e)}
                     />
                     <span>
@@ -199,12 +202,12 @@ export default withRouter(
           if (getCurrentDay.currentDayEntered === false) {
             this.setState({
               isLoaded: true,
-              currency: denominations
+              denominations
             });
           } else {
             this.setState({
               isLoaded: true,
-              currency: denominations,
+              denominations,
               currentDayEntered: getCurrentDay.currentDayEntered
             });
           }
