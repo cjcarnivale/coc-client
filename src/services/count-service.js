@@ -1,23 +1,23 @@
 import Config from "../config";
 
-const SafeCountService = {
+const CountService = {
   getAllSafeCounts() {
     return fetch(`${Config.API_ENDPOINT}/safecounts`).then(res => res.json());
   },
 
-  getSafeCount(day) {
-    return fetch(`${Config.API_ENDPOINT}/safecounts/${day}`).then(res =>
+  getCount(day, type) {
+    return fetch(`${Config.API_ENDPOINT}/${type}/${day}`).then(res =>
       res.json()
     );
   },
 
-  postSafeCount(newSafeCount) {
-    return fetch(`${Config.API_ENDPOINT}/safecounts`, {
+  postCount(newCount, type) {
+    return fetch(`${Config.API_ENDPOINT}/${type} `, {
       headers: {
         "content-type": "application/json"
       },
       method: "POST",
-      body: JSON.stringify(newSafeCount)
+      body: JSON.stringify(newCount)
     });
   },
 
@@ -38,4 +38,4 @@ const SafeCountService = {
   }
 };
 
-export default SafeCountService;
+export default CountService;

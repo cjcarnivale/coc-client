@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import SafeCountService from "../../services/safe-count-service";
+import CountService from "../../services/count-service";
 import DenominationService from "../../services/denominations-service";
 import dayjs from "dayjs";
 import clonedeep from "lodash/cloneDeep";
@@ -17,18 +17,17 @@ export default class History extends Component {
   }
 
   toggleEditItem = i => {
-      const updatedCounts = clonedeep(this.state.counts);
-      if (i === null){
+    const updatedCounts = clonedeep(this.state.counts);
+    if (i === null) {
       this.setState({
         updatedCounts: [],
         editing: i
       });
-    }
-    else{
+    } else {
       this.setState({
         updatedCounts,
         editing: i
-      })
+      });
     }
   };
 
@@ -43,24 +42,24 @@ export default class History extends Component {
   postUpdate = date => {
     date = dayjs(date).format("YYYY-MM-DD");
     const updatedCount = this.state.updatedCounts[this.state.editing];
-    SafeCountService.updateSafeCount(updatedCount, date).then(
+    CountService.updateSafeCount(updatedCount, date).then(
       res => {
         const updatedCount = clonedeep(this.state.updatedCounts);
         return !res.ok
-          ? res
-              .json()
-              .then(resJson =>
-                this.setState({
-                  error: resJson.error,
-                  isLoaded: true
-                })
-              )
-          :
-            this.setState({
-              isLoaded: true, 
-              counts: updatedCount,
-              error: null
-          }, this.toggleEditItem(null))
+          ? res.json().then(resJson =>
+              this.setState({
+                error: resJson.error,
+                isLoaded: true
+              })
+            )
+          : this.setState(
+              {
+                isLoaded: true,
+                counts: updatedCount,
+                error: null
+              },
+              this.toggleEditItem(null)
+            );
       },
       error => {
         this.setState({
@@ -68,19 +67,19 @@ export default class History extends Component {
           error: error.message
         });
       }
-    )
+    );
   };
 
-  deleteCount = (date, i) => { 
+  deleteCount = (date, i) => {
     date = dayjs(date).format("YYYY-MM-DD");
     const copy = clonedeep(this.state.counts);
-    copy.splice(i, 1)
-    SafeCountService.deleteSafeCount(date).then(
+    copy.splice(i, 1);
+    CountService.deleteSafeCount(date).then(
       () => {
-          this.setState({
-            counts: copy,
-            isLoaded: true
-          });
+        this.setState({
+          counts: copy,
+          isLoaded: true
+        });
       },
       error => {
         this.setState({
@@ -159,7 +158,10 @@ export default class History extends Component {
                     <button
                       type="button"
                       onClick={() =>
-                        this.deleteCount(this.state.counts[i].id.slice(4, 16), i)
+                        this.deleteCount(
+                          this.state.counts[i].id.slice(4, 16),
+                          i
+                        )
                       }
                     >
                       Delete
@@ -177,7 +179,7 @@ export default class History extends Component {
   componentDidMount() {
     function getSafeCountsAndDenominations() {
       return Promise.all([
-        SafeCountService.getAllSafeCounts(),
+        CountService.getAllSafeCounts(),
         DenominationService.getDenominations()
       ]);
     }

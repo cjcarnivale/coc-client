@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import "./Calculator.css";
-import SafeCountService from "../../services/safe-count-service";
+import CountService from "../../services/count-service";
 import DenominationsService from "../../services/denominations-service";
 import dayjs from "dayjs";
 import clonedeep from "lodash/cloneDeep";
+import generateChangeOrder from "../../services/generate-change-order-service";
 
 export default withRouter(
   class Calculator extends Component {
@@ -17,12 +18,19 @@ export default withRouter(
         error: null,
         confirmSubmit: false,
         currentDayEntered: false,
+        editingChangeOrder: false,
+        count: {},
         gTotal: () => {
-          return this.state.denominations.reduce(
-            (accumulator, currentValue) =>
-              accumulator + currentValue.count * currentValue.multiplier,
-            0
-          );
+          let total = 0;
+          for (let key in this.state.count) {
+            total += parseInt(
+              this.state.count[key] *
+                this.state.denominations.find(den => den.name === key)[
+                  "multiplier"
+                ]
+            );
+          }
+          return total;
         }
       };
     }
@@ -34,17 +42,23 @@ export default withRouter(
       });
     };
 
-    updateCount = (i, e) => {
-      let denominations = clonedeep(this.state.denominations);
-      denominations[i].count = e.target.value;
+    updateCount = (key, e) => {
+      let count = clonedeep(this.state.count);
+      count[key] = e.target.value;
       this.setState({
-        denominations
+        count
       });
     };
 
     toggleConfirmSubmit = () => {
       this.setState({
         confirmSubmit: !this.state.confirmSubmit
+      });
+    };
+
+    toggleEditingChangeOrder = () => {
+      this.setState({
+        editingChangeOrder: !this.state.editingChangeOrder
       });
     };
 
@@ -61,19 +75,16 @@ export default withRouter(
       });
     };
 
-    postSafeCount = () => {
+    postCount = () => {
       this.toggleConfirmSubmit();
-      const newSafeCount = {
+      const newCount = {
         date: dayjs(this.state.date).format("YYYY-MM-DD")
       };
 
-      for (let i = 0; i < this.state.denominations.length; i++) {
-        Object.assign(newSafeCount, {
-          [this.state.denominations[i].name]: this.state.denominations[i].count
-        });
-      }
+    Object.assign(newCount, this.state.count);
+    console.log(newCount)
 
-      SafeCountService.postSafeCount(newSafeCount).then(
+      CountService.postCount(newCount, this.props.type).then(
         res => {
           return !res.ok
             ? res.json().then(resJson =>
@@ -108,6 +119,19 @@ export default withRouter(
       this.resetCounts();
     };
 
+    generateChangeOrder = () => {
+      this.toggleEditingChangeOrder();
+      generateChangeOrder(dayjs(this.state.date).format("YYYY-MM-DD")).then(
+        resJson => {
+          const { date, ...count } = resJson[0]
+          this.setState({
+            isLoaded: true,
+            count 
+          })
+        }
+      );
+    };
+
     render() {
       return (
         <div className="count-form-container">
@@ -131,84 +155,127 @@ export default withRouter(
                 {this.state.error && (
                   <div className="validation-error">{this.state.error}</div>
                 )}
-                {this.state.denominations.map((den, i) => (
-                  <div className="denominations-item" key={i}>
-                    <span>{`${den.name
-                      .charAt(0)
-                      .toUpperCase()}${den.name.substring(1)}`}</span>
-                    <input
-                      step="1"
-                      type="number"
-                      min="0"
-                      value={this.state.denominations[i].count}
-                      onChange={e => this.updateCount(i, e)}
-                    />
-                    <span>
-                      {`${den.type}`}
-                      {den.count !== "1" ? "s" : ""}
-                    </span>
-                    <span>Total: $ {den.count * den.multiplier}</span>
-                  </div>
-                ))}
-                <button type="button" onClick={this.resetCounts}>
-                  Reset
-                </button>
-                <div className="grand-total">
-                  Grand Total: $ {this.state.gTotal()}
-                  {this.state.gTotal() !== 1750 && (
-                    <div className="total-match">
-                      Your count does not match what should be in the safe
-                    </div>
-                  )}
-                </div>
-                {this.state.currentDayEntered && !this.props.manual ? (
-                  <div className="already-entered">
-                    You have entered a safe count for today!
-                  </div>
-                ) : !this.state.confirmSubmit ? (
+                {!this.state.currentDayEntered &&
+                !this.state.editingChangeOrder &&
+                this.props.type === "changeorders" ? (
                   <div>
-                    <button type="button" onClick={this.toggleConfirmSubmit}>
-                      Submit Count
+                    <button type="button" onClick={this.generateChangeOrder}>
+                      Generate Change Order
                     </button>
                   </div>
                 ) : (
+                  Object.keys(this.state.count).map((key, i) => (
+                    <div className="denominations-item" key={i}>
+                      <span>{`${key.charAt(0).toUpperCase()}${key.substring(
+                        1
+                      )}`}</span>
+                      <input
+                        step="1"
+                        type="number"
+                        min="0"
+                        value={this.state.count[key]}
+                        onChange={e => this.updateCount(key, e)}
+                      />
+                      <span>
+                        {`${
+                          this.state.denominations.find(
+                            den => den.name === key
+                          )["type"]
+                        }`}
+                        {this.state.count[key] !== "1" ? `s` : ""}
+                      </span>
+                      <span>
+                        Total: $
+                        {this.state.count[key] *
+                          this.state.denominations.find(
+                            den => den.name === key
+                          )["multiplier"]}
+                      </span>
+                    </div>
+                  ))
+                )}
+                {!this.state.currentDayEntered &&
+                !this.state.editingChangeOrder &&
+                this.props.type === "changeorders" ? (
+                  <> </>
+                ) : (
                   <div>
-                    <button type="button" onClick={this.postSafeCount}>
-                      Confirm
+                    <button type="button" onClick={this.resetCounts}>
+                      Reset
                     </button>
-                    <button type="button" onClick={this.toggleConfirmSubmit}>
-                      Cancel
-                    </button>
+                    <div className="grand-total">
+                      Grand Total: $ {this.state.gTotal()}
+                      {(this.state.gTotal() !== 1750 && this.props.type === "safecounts")&& (
+                        <div className="total-match">
+                          Your count does not match what should be in the safe
+                        </div>
+                      )}
+                    </div>
+                    {this.state.currentDayEntered && !this.props.manual ? (
+                      <div className="already-entered">
+                        You have entered a safe count for today!
+                      </div>
+                    ) : !this.state.confirmSubmit ? (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={this.toggleConfirmSubmit}
+                        >
+                          Submit Count
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <button type="button" onClick={this.postCount}>
+                          Confirm
+                        </button>
+                        <button
+                          type="button"
+                          onClick={this.toggleConfirmSubmit}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </form>
             </div>
           )}
+          }
         </div>
       );
     }
 
     componentDidMount() {
-      function getSafeCountAndDenominations(date) {
+      function getCountAndDenominations(date, type) {
         return Promise.all([
-          SafeCountService.getSafeCount(date),
-          DenominationsService.getDenominations()
+          CountService.getCount(date, type),
+          DenominationsService.getDenominations(type)
         ]);
       }
-      getSafeCountAndDenominations(
-        dayjs(this.state.date).format("YYYY-MM-DD")
+      getCountAndDenominations(
+        dayjs(this.state.date).format("YYYY-MM-DD"),
+        this.props.type
       ).then(
         ([getCurrentDay, denominations]) => {
-          if (getCurrentDay.currentDayEntered === false) {
+          let count = {};
+          denominations.forEach(den => {
+            count[den.name] = 0;
+          });
+          if (getCurrentDay.length === 0) {
             this.setState({
               isLoaded: true,
-              denominations
+              denominations,
+              currentDayEntered: false,
+              count
             });
           } else {
             this.setState({
               isLoaded: true,
               denominations,
-              currentDayEntered: getCurrentDay.currentDayEntered
+              currentDayEntered: true,
+              count
             });
           }
         },
