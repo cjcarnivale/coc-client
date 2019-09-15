@@ -1,7 +1,3 @@
-.count-form-container {
-  margin-top: 30px;
-}
-
 .count-form span {
   display: inline-block;
   width: 100px;
@@ -13,55 +9,21 @@
   width: 50px;
 }
 
-.count-form button {
-  margin-top: 20px;
+.form-button { 
+  margin-top: 15px;
 }
 
-.grand-total {
-  margin-top: 20px;
-}
-
-.count-form {
-  margin: 0 auto;
+.date-display {
   text-align: center;
-  border: 1px solid black;
-  padding: 20px;
-  border-radius: 10px;
-  width: 500px;
-}
-
-.error,
-.loading,
-.date-display,
-.already-entered,
-.validation-error {
-  text-align: center;
+  margin-bottom: 1em; 
 }
 
 .error {
+  text-align: center; 
   color: red;
-  font-size: 2em;
+  margin-bottom: 2em;
 }
 
-.loading {
-  animation: blinker 1s linear infinite;
-}
-
-.total-match, 
-.validation-error {
-  color: red; 
-}
-
-.already-entered {
-  color: green; 
-}
-
-.validation-error {
-  margin-bottom: 2em; 
-}
-
-@keyframes blinker {
-  50% {
-    opacity: 0;
-  }
+.grand-total {
+  margin-top: 15px; 
 }

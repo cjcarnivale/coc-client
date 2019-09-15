@@ -14,26 +14,22 @@ export default withRouter(
       this.state = {
         date: dayjs(Date.now()).format("YYYY/MM/DD"),
         denominations: [],
-        isLoaded: false,
         error: null,
         confirmSubmit: false,
-        currentDayEntered: false,
-        editingChangeOrder: false,
-        count: {},
-        gTotal: () => {
-          let total = 0;
-          for (let key in this.state.count) {
-            total += parseInt(
-              this.state.count[key] *
-                this.state.denominations.find(den => den.name === key)[
-                  "multiplier"
-                ]
-            );
-          }
-          return total;
-        }
+        count: {}
       };
     }
+
+    gTotal = () => {
+      let total = 0;
+      for (let key in this.state.count) {
+        total += parseInt(
+          this.state.count[key] *
+            this.state.denominations.find(den => den.name === key)["multiplier"]
+        );
+      }
+      return total;
+    };
 
     updateDate = e => {
       const date = e.target.value;
@@ -45,9 +41,12 @@ export default withRouter(
     updateCount = (key, e) => {
       let count = clonedeep(this.state.count);
       count[key] = e.target.value;
-      this.setState({
-        count
-      });
+      this.setState(
+        {
+          count
+        },
+        () => this.props.setGTotal(this.gTotal())
+      );
     };
 
     toggleConfirmSubmit = () => {
@@ -81,26 +80,25 @@ export default withRouter(
         date: dayjs(this.state.date).format("YYYY-MM-DD")
       };
 
-    Object.assign(newCount, this.state.count);
-    console.log(newCount)
+      Object.assign(newCount, this.state.count);
 
       CountService.postCount(newCount, this.props.type).then(
         res => {
           return !res.ok
             ? res.json().then(resJson =>
                 this.setState({
-                  error: resJson.error,
-                  isLoaded: true
+                  error: resJson.error
                 })
               )
             : res
                 .json()
                 .then(
-                  this.setState({
-                    isLoaded: true,
-                    currentDayEntered: true,
-                    error: null
-                  })
+                  this.setState(
+                    {
+                      error: null
+                    },
+                    () => this.props.setCurrentDayEntered(true)
+                  )
                 )
                 .then(() => {
                   if (this.props.manual) {
@@ -109,10 +107,12 @@ export default withRouter(
                 });
         },
         error => {
-          this.setState({
-            isLoaded: false,
-            error
-          });
+          this.setState(
+            {
+              error: error.message
+            },
+            () => this.props.setIsLoaded(false)
+          );
         }
       );
 
@@ -123,126 +123,112 @@ export default withRouter(
       this.toggleEditingChangeOrder();
       generateChangeOrder(dayjs(this.state.date).format("YYYY-MM-DD")).then(
         resJson => {
-          const { date, ...count } = resJson[0]
+          const { date, ...count } = resJson[0];
           this.setState({
             isLoaded: true,
-            count 
-          })
+            count
+          });
         }
       );
     };
 
     render() {
       return (
-        <div className="count-form-container">
-          {!this.state.isLoaded ? (
-            <div className="loading">Loading</div>
-          ) : (
-            <div>
-              <div className="date-display">
-                Date:{" "}
-                {this.props.manual ? (
+        <div>
+          <div className="date-display">
+            Date:{" "}
+            {this.props.manual ? (
+              <input
+                type="date"
+                value={dayjs(this.state.date).format("YYYY-MM-DD")}
+                onChange={e => this.updateDate(e)}
+              />
+            ) : (
+              dayjs(this.state.date).format("MM-DD-YYYY")
+            )}
+          </div>
+          <form className="count-form">
+            {this.state.error && (
+              <div className="error">{this.state.error}</div>
+            )}
+            {Object.keys(this.state.count).map((key, i) => (
+              <div className="denominations-item" key={i}>
+                <span>{`${key.charAt(0).toUpperCase()}${key.substring(
+                  1
+                )}`}</span>
+                {this.props.changeOrderEntered ? (
+                  <span>{this.state.count[key]}</span>
+                ) : (
                   <input
-                    type="date"
-                    value={dayjs(this.state.date).format("YYYY-MM-DD")}
-                    onChange={e => this.updateDate(e)}
+                    step="1"
+                    type="number"
+                    min="0"
+                    value={this.state.count[key]}
+                    onChange={e => this.updateCount(key, e)}
                   />
-                ) : (
-                  dayjs(this.state.date).format("MM-DD-YYYY")
                 )}
+                <span>
+                  {`${
+                    this.state.denominations.find(den => den.name === key)[
+                      "type"
+                    ]
+                  }`}
+                  {this.state.count[key] !== "1" ? `s` : ""}
+                </span>
+                <span>
+                  Total: $
+                  {this.state.count[key] *
+                    this.state.denominations.find(den => den.name === key)[
+                      "multiplier"
+                    ]}
+                </span>
               </div>
-              <form className="count-form">
-                {this.state.error && (
-                  <div className="validation-error">{this.state.error}</div>
-                )}
-                {!this.state.currentDayEntered &&
-                !this.state.editingChangeOrder &&
-                this.props.type === "changeorders" ? (
-                  <div>
-                    <button type="button" onClick={this.generateChangeOrder}>
-                      Generate Change Order
-                    </button>
-                  </div>
-                ) : (
-                  Object.keys(this.state.count).map((key, i) => (
-                    <div className="denominations-item" key={i}>
-                      <span>{`${key.charAt(0).toUpperCase()}${key.substring(
-                        1
-                      )}`}</span>
-                      <input
-                        step="1"
-                        type="number"
-                        min="0"
-                        value={this.state.count[key]}
-                        onChange={e => this.updateCount(key, e)}
-                      />
-                      <span>
-                        {`${
-                          this.state.denominations.find(
-                            den => den.name === key
-                          )["type"]
-                        }`}
-                        {this.state.count[key] !== "1" ? `s` : ""}
-                      </span>
-                      <span>
-                        Total: $
-                        {this.state.count[key] *
-                          this.state.denominations.find(
-                            den => den.name === key
-                          )["multiplier"]}
-                      </span>
+            ))}
+            <div>
+              {!this.props.changeOrderEntered && (
+                <button
+                  className="form-button"
+                  type="button"
+                  onClick={this.resetCounts}
+                >
+                  Reset
+                </button>
+              )}
+              <div className="grand-total">Grand Total: $ {this.gTotal()}</div>
+              {(!this.props.currentDayEntered || this.props.manual) && (
+                <div>
+                  {!this.state.confirmSubmit ? (
+                    <div>
+                      <button
+                        className="form-button"
+                        type="button"
+                        onClick={this.toggleConfirmSubmit}
+                      >
+                        Submit Count
+                      </button>
                     </div>
-                  ))
-                )}
-                {!this.state.currentDayEntered &&
-                !this.state.editingChangeOrder &&
-                this.props.type === "changeorders" ? (
-                  <> </>
-                ) : (
-                  <div>
-                    <button type="button" onClick={this.resetCounts}>
-                      Reset
-                    </button>
-                    <div className="grand-total">
-                      Grand Total: $ {this.state.gTotal()}
-                      {(this.state.gTotal() !== 1750 && this.props.type === "safecounts")&& (
-                        <div className="total-match">
-                          Your count does not match what should be in the safe
-                        </div>
-                      )}
+                  ) : (
+                    <div>
+                      <button
+                        className="form-button"
+                        type="button"
+                        onClick={this.postCount}
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        className="form-button"
+                        type="button"
+                        onClick={this.toggleConfirmSubmit}
+                      >
+                        Cancel
+                      </button>
                     </div>
-                    {this.state.currentDayEntered && !this.props.manual ? (
-                      <div className="already-entered">
-                        You have entered a safe count for today!
-                      </div>
-                    ) : !this.state.confirmSubmit ? (
-                      <div>
-                        <button
-                          type="button"
-                          onClick={this.toggleConfirmSubmit}
-                        >
-                          Submit Count
-                        </button>
-                      </div>
-                    ) : (
-                      <div>
-                        <button type="button" onClick={this.postCount}>
-                          Confirm
-                        </button>
-                        <button
-                          type="button"
-                          onClick={this.toggleConfirmSubmit}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </form>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-          }
+          </form>
         </div>
       );
     }
@@ -260,30 +246,38 @@ export default withRouter(
       ).then(
         ([getCurrentDay, denominations]) => {
           let count = {};
-          denominations.forEach(den => {
-            count[den.name] = 0;
-          });
+          if (this.props.type === "safecounts") {
+            denominations.forEach(den => {
+              count[den.name] = 0;
+            });
+          } else {
+            if (getCurrentDay.length === 0) {
+              Object.assign(count, this.props.changeOrder);
+            } else {
+              const { id, ...changeOrder } = getCurrentDay[0];
+              Object.assign(count, changeOrder);
+            }
+          }
           if (getCurrentDay.length === 0) {
             this.setState({
-              isLoaded: true,
               denominations,
-              currentDayEntered: false,
               count
             });
           } else {
             this.setState({
-              isLoaded: true,
               denominations,
-              currentDayEntered: true,
               count
             });
+            this.props.setCurrentDayEntered(true);
           }
         },
         error => {
-          this.setState({
-            isLoaded: false,
-            error: error.message
-          });
+          this.setState(
+            {
+              error: error.message
+            },
+            () => this.props.setIsLoaded(false)
+          );
         }
       );
     }

@@ -11,8 +11,7 @@ export default class SafeCountHistoryRoute extends Component {
           to={{
             pathname: "/addsafecount",
             state: {
-              manual: true,
-              type: "safecounts"
+              manual: true
             }
           }}
         >
