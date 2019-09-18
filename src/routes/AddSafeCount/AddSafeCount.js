@@ -1,12 +1,14 @@
 import React, { Component } from "react";
-import SafeCountCalculator from "../../components/SafeCountCalculator/SafeCountCalculator";
+import Calculator from "../../components/Calculator/Calculator";
+
 export default class AddSafeCount extends Component {
   render() {
     return (
       <div>
-        <h2 className="calculator-title">Add Safe Count</h2>
-        <SafeCountCalculator
+        <h2>Add Safe Count</h2>
+        <Calculator
           manual={this.props.location.state.manual}
+          type={this.props.location.state.type}
         />
       </div>
     );

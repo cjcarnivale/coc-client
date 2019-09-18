@@ -1,18 +1,18 @@
 import React, { Component } from "react";
-import SafeCountCalculator from "../../components/SafeCountCalculator/SafeCountCalculator";
-import ChangeOrderCalculator from "../../components/ChangeOrderCalculator/ChangeOrderCalculator"
+import Calculator from "../../components/Calculator/Calculator";
+import "./DashboardRoute.css";
 
 export default class Dashboard extends Component {
   render() {
     return (
       <div>
         <div>
-          <h2 className="calculator-title">Safe Count</h2>
-          <SafeCountCalculator manual={false} />
+          <h2 className="scc-heading">Safe Count</h2>
+          <Calculator manual={false} type="safecounts" />
         </div>
         <div>
-          <h2 className="calculator-title">Change Order Calculator</h2>
-          <ChangeOrderCalculator manual={false}/>
+          <h2>Change Order Calculator</h2>
+          <Calculator manual={false} type="changeorders" />
         </div>
       </div>
     );
