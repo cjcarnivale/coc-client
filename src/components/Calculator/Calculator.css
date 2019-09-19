@@ -16,8 +16,8 @@
 }
 
 #count-form-value {
-  width: 25px; 
-  margin-right: 10px; 
+  width: 25px;
+  margin-right: 10px;
 }
 
 .count-form button {
@@ -29,7 +29,7 @@
 }
 
 .count-form {
-  text-align: center; 
+  text-align: center;
   border: 1px solid black;
   padding: 20px;
   border-radius: 10px;
@@ -47,17 +47,17 @@
   animation: blinker 1s linear infinite;
 }
 
-.total-match, 
+.total-match,
 .error {
-  color: red; 
+  color: red;
 }
 
 .already-entered {
-  color: green; 
+  color: green;
 }
 
 .error {
-  margin-bottom: 2em; 
+  margin-bottom: 2em;
 }
 
 @keyframes blinker {
@@ -65,7 +65,12 @@
     opacity: 0;
   }
 }
-  .date-display {
-    margin-bottom: 15px; 
-  }
 
+.date-display {
+  margin-bottom: 15px;
+}
+
+.generate-button-container {
+  display: flex;
+  justify-content: center
+}

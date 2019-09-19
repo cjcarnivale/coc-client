@@ -163,7 +163,7 @@ export default withRouter(
               this.props.type === "changeorders" &&
               this.state.generateChangeOrder &&
               !this.props.manual ? (
-                <div>
+                <div className="generate-button-container">
                   <button
                     type="button"
                     className="generate-button"
