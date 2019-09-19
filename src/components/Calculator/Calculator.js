@@ -18,8 +18,8 @@ export default withRouter(
         error: null,
         confirmSubmit: false,
         currentDayEntered: false,
-        editingChangeOrder: false,
         count: {},
+        resetCount: {},
         gTotal: () => {
           let total = 0;
           for (let key in this.state.count) {
@@ -33,6 +33,9 @@ export default withRouter(
           return total;
         }
       };
+      if (this.props.type === "changeorders" && !this.props.manual) {
+        this.state.generateChangeOrder = true;
+      }
     }
 
     updateDate = e => {
@@ -50,39 +53,34 @@ export default withRouter(
       });
     };
 
-    toggleConfirmSubmit = () => {
+    toggleConfirmSubmit = e => {
+      e.preventDefault();
       this.setState({
         confirmSubmit: !this.state.confirmSubmit
       });
     };
 
-    toggleEditingChangeOrder = () => {
+    toggleGenerateChangeOrder = () => {
       this.setState({
-        editingChangeOrder: !this.state.editingChangeOrder
+        generateChangeOrder: !this.state.generateChangeOrder
       });
     };
 
     resetCounts = () => {
-      let copy = clonedeep(this.state.denominations);
-      let reset = [];
-      for (let i = 0; i < copy.length; i++) {
-        const den = copy[i];
-        den.count = 0;
-        reset.push(den);
-      }
+      const resetCount = clonedeep(this.state.resetCount)
       this.setState({
-        denominations: reset
+        count: resetCount
       });
     };
 
-    postCount = () => {
-      this.toggleConfirmSubmit();
+    postCount = e => {
+      e.preventDefault();
+      this.toggleConfirmSubmit(e);
       const newCount = {
         date: dayjs(this.state.date).format("YYYY-MM-DD")
       };
 
-    Object.assign(newCount, this.state.count);
-    console.log(newCount)
+      Object.assign(newCount, this.state.count);
 
       CountService.postCount(newCount, this.props.type).then(
         res => {
@@ -115,19 +113,38 @@ export default withRouter(
           });
         }
       );
-
+      if (!this.props.manual && this.props.type === "safecounts"){
       this.resetCounts();
+      }
     };
 
     generateChangeOrder = () => {
-      this.toggleEditingChangeOrder();
       generateChangeOrder(dayjs(this.state.date).format("YYYY-MM-DD")).then(
-        resJson => {
-          const { date, ...count } = resJson[0]
+        res => {
+          return !res.ok
+            ? res.json().then(resJson =>
+                this.setState({
+                  error: resJson.error
+                })
+              )
+            : res.json().then(resJson => {
+                const { date, ...count } = resJson[0];
+                this.setState(
+                  {
+                    error: null,
+                    isLoaded: true,
+                    count,
+                    resetCount: count
+                  },
+                  () => this.toggleGenerateChangeOrder()
+                );
+              });
+        },
+        error => {
           this.setState({
-            isLoaded: true,
-            count 
-          })
+            isLoaded: false,
+            error
+          });
         }
       );
     };
@@ -139,110 +156,134 @@ export default withRouter(
             <div className="loading">Loading</div>
           ) : (
             <div>
-              <div className="date-display">
-                Date:{" "}
-                {this.props.manual ? (
-                  <input
-                    type="date"
-                    value={dayjs(this.state.date).format("YYYY-MM-DD")}
-                    onChange={e => this.updateDate(e)}
-                  />
-                ) : (
-                  dayjs(this.state.date).format("MM-DD-YYYY")
-                )}
-              </div>
-              <form className="count-form">
-                {this.state.error && (
-                  <div className="validation-error">{this.state.error}</div>
-                )}
-                {!this.state.currentDayEntered &&
-                !this.state.editingChangeOrder &&
-                this.props.type === "changeorders" ? (
-                  <div>
-                    <button type="button" onClick={this.generateChangeOrder}>
-                      Generate Change Order
-                    </button>
-                  </div>
-                ) : (
-                  Object.keys(this.state.count).map((key, i) => (
-                    <div className="denominations-item" key={i}>
-                      <span>{`${key.charAt(0).toUpperCase()}${key.substring(
-                        1
-                      )}`}</span>
-                      <input
-                        step="1"
-                        type="number"
-                        min="0"
-                        value={this.state.count[key]}
-                        onChange={e => this.updateCount(key, e)}
-                      />
-                      <span>
-                        {`${
-                          this.state.denominations.find(
-                            den => den.name === key
-                          )["type"]
-                        }`}
-                        {this.state.count[key] !== "1" ? `s` : ""}
-                      </span>
-                      <span>
-                        Total: $
-                        {this.state.count[key] *
-                          this.state.denominations.find(
-                            den => den.name === key
-                          )["multiplier"]}
-                      </span>
+              {this.state.error && (
+                <div className="error">{this.state.error}</div>
+              )}
+              {!this.state.currentDayEntered &&
+              this.props.type === "changeorders" &&
+              this.state.generateChangeOrder &&
+              !this.props.manual ? (
+                <div>
+                  <button
+                    type="button"
+                    className="generate-button"
+                    onClick={this.generateChangeOrder}
+                  >
+                    Generate Change Order
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <form
+                    className="count-form"
+                    onSubmit={e => this.postCount(e)}
+                  >
+                    <div className="date-display">
+                      Date:{" "}
+                      {this.props.manual ? (
+                        <input
+                          type="date"
+                          value={dayjs(this.state.date).format("YYYY-MM-DD")}
+                          onChange={e => this.updateDate(e)}
+                        />
+                      ) : (
+                        dayjs(this.state.date).format("MM-DD-YYYY")
+                      )}
                     </div>
-                  ))
-                )}
-                {!this.state.currentDayEntered &&
-                !this.state.editingChangeOrder &&
-                this.props.type === "changeorders" ? (
-                  <> </>
-                ) : (
-                  <div>
-                    <button type="button" onClick={this.resetCounts}>
-                      Reset
-                    </button>
-                    <div className="grand-total">
-                      Grand Total: $ {this.state.gTotal()}
-                      {(this.state.gTotal() !== 1750 && this.props.type === "safecounts")&& (
-                        <div className="total-match">
-                          Your count does not match what should be in the safe
+                    {Object.keys(this.state.count).map((key, i) => (
+                      <div className="denominations-item" key={i}>
+                        <span>{`${key.charAt(0).toUpperCase()}${key.substring(
+                          1
+                        )}`}</span>
+                        {(this.state.currentDayEntered && this.props.type) ===
+                        "changeorders" ? (
+                          <span id="count-form-value">
+                            {this.state.count[key]}
+                          </span>
+                        ) : (
+                          <input
+                            className="count-form-input"
+                            step="1"
+                            type="number"
+                            min="0"
+                            value={this.state.count[key]}
+                            onChange={e => this.updateCount(key, e)}
+                          />
+                        )}
+                        <span>
+                          {`${
+                            this.state.denominations.find(
+                              den => den.name === key
+                            )["type"]
+                          }`}
+                          {this.state.count[key] !== "1" ? `s` : ""}
+                        </span>
+                        <span>
+                          Total: $
+                          {this.state.count[key] *
+                            this.state.denominations.find(
+                              den => den.name === key
+                            )["multiplier"]}
+                        </span>
+                      </div>
+                    ))}
+                    <div>
+                      {(this.props.type === "safecounts" ||
+                        (this.props.type === "changeorders" &&
+                          !this.state.currentDayEntered)) && (
+                        <button type="button" onClick={this.resetCounts}>
+                          Reset
+                        </button>
+                      )}
+                      <div className="grand-total">
+                        Grand Total: $ {this.state.gTotal()}
+                        {this.state.gTotal() !== 1750 &&
+                          this.props.type === "safecounts" && (
+                            <div className="total-match">
+                              Your count does not match what should be in the
+                              safe
+                            </div>
+                          )}
+                      </div>
+                      {this.state.currentDayEntered && !this.props.manual ? (
+                        <div>
+                          {this.props.type === "safecounts" && (
+                            <div className="already-entered">
+                              You have entered a safe count for today!
+                            </div>
+                          )}
+                          {this.props.type === "changeorders" && (
+                            <div className="already-entered">
+                              You have entered a change order for today!
+                            </div>
+                          )}
+                        </div>
+                      ) : !this.state.confirmSubmit ? (
+                        <div>
+                          <button
+                            type="button"
+                            onClick={e => this.toggleConfirmSubmit(e)}
+                          >
+                            Submit Count
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <button type="submit">Confirm</button>
+                          <button
+                            type="button"
+                            onClick={e => this.toggleConfirmSubmit(e)}
+                          >
+                            Cancel
+                          </button>
                         </div>
                       )}
                     </div>
-                    {this.state.currentDayEntered && !this.props.manual ? (
-                      <div className="already-entered">
-                        You have entered a safe count for today!
-                      </div>
-                    ) : !this.state.confirmSubmit ? (
-                      <div>
-                        <button
-                          type="button"
-                          onClick={this.toggleConfirmSubmit}
-                        >
-                          Submit Count
-                        </button>
-                      </div>
-                    ) : (
-                      <div>
-                        <button type="button" onClick={this.postCount}>
-                          Confirm
-                        </button>
-                        <button
-                          type="button"
-                          onClick={this.toggleConfirmSubmit}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </form>
+                  </form>
+                </div>
+              )}
             </div>
           )}
-          }
         </div>
       );
     }
@@ -260,22 +301,30 @@ export default withRouter(
       ).then(
         ([getCurrentDay, denominations]) => {
           let count = {};
-          denominations.forEach(den => {
-            count[den.name] = 0;
-          });
+          if (this.props.type === "safecounts") {
+            denominations.forEach(den => {
+              count[den.name] = 0;
+            });
+          }
           if (getCurrentDay.length === 0) {
             this.setState({
               isLoaded: true,
               denominations,
               currentDayEntered: false,
-              count
+              count, 
+              resetCount: count
             });
           } else {
+            if (this.props.type === "changeorders") {
+              const { id, ...changeOrderCount } = getCurrentDay[0];
+              Object.assign(count, changeOrderCount);
+            }
             this.setState({
               isLoaded: true,
               denominations,
               currentDayEntered: true,
-              count
+              count,
+              resetCount: count
             });
           }
         },

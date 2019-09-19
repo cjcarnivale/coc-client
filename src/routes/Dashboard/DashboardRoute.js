@@ -7,11 +7,11 @@ export default class Dashboard extends Component {
     return (
       <div>
         <div>
-          <h2 className="scc-heading">Safe Count</h2>
+          <h2 className="calculator-heading">Safe Count</h2>
           <Calculator manual={false} type="safecounts" />
         </div>
         <div>
-          <h2>Change Order Calculator</h2>
+          <h2 className= "calculator-heading">Change Order Calculator</h2>
           <Calculator manual={false} type="changeorders" />
         </div>
       </div>

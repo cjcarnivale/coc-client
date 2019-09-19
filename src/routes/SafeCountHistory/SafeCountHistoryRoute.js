@@ -18,7 +18,7 @@ export default class SafeCountHistoryRoute extends Component {
         >
           Add Safe Count
         </Link>
-        <History />
+        <History type="safecounts"/>
       </div>
     );
   }

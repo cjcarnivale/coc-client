@@ -177,13 +177,14 @@ export default class History extends Component {
   }
 
   componentDidMount() {
-    function getSafeCountsAndDenominations() {
+    function getSafeCountsAndDenominations(type) {
       return Promise.all([
-        CountService.getAllSafeCounts(),
-        DenominationService.getDenominations()
+        CountService.getAllCounts(type),
+        DenominationService.getDenominations(type)
       ]);
     }
-    getSafeCountsAndDenominations().then(
+    getSafeCountsAndDenominations(
+    this.props.type).then(
       ([counts, denominations]) => {
         this.setState({
           isLoaded: true,

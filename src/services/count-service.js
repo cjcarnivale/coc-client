@@ -1,8 +1,8 @@
 import Config from "../config";
 
 const CountService = {
-  getAllSafeCounts() {
-    return fetch(`${Config.API_ENDPOINT}/safecounts`).then(res => res.json());
+  getAllCounts(type) {
+    return fetch(`${Config.API_ENDPOINT}/${type}`).then(res => res.json());
   },
 
   getCount(day, type) {
