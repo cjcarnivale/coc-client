@@ -6,7 +6,8 @@ export default class SafeCountHistoryRoute extends Component {
   render() {
     return (
       <div>
-        <h2>Safe Count History</h2>
+        <h2 className="heading">Safe Count History</h2>
+        <div className="add-link-container">
         <Link
           to={{
             pathname: "/addsafecount",
@@ -18,6 +19,7 @@ export default class SafeCountHistoryRoute extends Component {
         >
           Add Safe Count
         </Link>
+        </div>
         <History type="safecounts"/>
       </div>
     );

@@ -5,7 +5,7 @@ export default class AddSafeCount extends Component {
   render() {
     return (
       <div>
-        <h2 className="calculator-heading">Add Safe Count</h2>
+        <h2 className="heading">Add Safe Count</h2>
         <Calculator
           manual={this.props.location.state.manual}
           type={this.props.location.state.type}

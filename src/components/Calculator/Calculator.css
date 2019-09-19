@@ -43,9 +43,6 @@
   text-align: center;
 }
 
-.loading {
-  animation: blinker 1s linear infinite;
-}
 
 .total-match,
 .error {
@@ -57,13 +54,7 @@
 }
 
 .error {
-  margin-bottom: 2em;
-}
-
-@keyframes blinker {
-  50% {
-    opacity: 0;
-  }
+  margin-bottom: 10px;
 }
 
 .date-display {
@@ -74,3 +65,5 @@
   display: flex;
   justify-content: center
 }
+
+
