@@ -8,19 +8,19 @@ export default class SafeCountHistoryRoute extends Component {
       <div>
         <h2 className="heading">Safe Count History</h2>
         <div className="add-link-container">
-        <Link
-          to={{
-            pathname: "/addsafecount",
-            state: {
-              manual: true,
-              type: "safecounts"
-            }
-          }}
-        >
-          Add Safe Count
-        </Link>
+          <Link
+            to={{
+              pathname: "/addcount",
+              state: {
+                manual: true,
+                type: "safecounts"
+              }
+            }}
+          >
+            Add Safe Count
+          </Link>
         </div>
-        <History type="safecounts"/>
+        <History type="safecounts" />
       </div>
     );
   }

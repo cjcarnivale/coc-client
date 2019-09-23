@@ -1,24 +1,25 @@
 import React, { Component } from "react";
-import { BrowserRouter, Switch, Route } from "react-router-dom"; 
-import Dashboard from "../../routes/Dashboard/DashboardRoute";
-import SafeCountHistoryRoute from "../../routes/SafeCountHistory/SafeCountHistoryRoute";
-import AddSafeCount from "../../routes/AddSafeCount/AddSafeCount"
-import NavBar from "../NavBar/NavBar"
-import './App.css'
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+import DashboardRoute from "../../routes/DashboardRoute/DashboardRoute";
+import SafeCountHistoryRoute from "../../routes/SafeCountHistoryRoute/SafeCountHistoryRoute";
+import ChangeOrderHistoryRoute from "../../routes/ChangeOrderHistoryRoute/ChangeOrderHistoryRoute"
+import AddCountRoute from "../../routes/AddCountRoute/AddCountRoute";
+import NavBar from "../NavBar/NavBar";
+import "./App.css";
 export default class App extends Component {
   render() {
     return (
       <main className="App">
         <BrowserRouter>
-        <NavBar />
+          <NavBar />
           <Switch>
-            <Route exact path='/' component={Dashboard}/>
-            <Route path='/safecounthistory' component={SafeCountHistoryRoute} />
-            <Route path='/addsafecount' component={AddSafeCount} />
+            <Route exact path="/" component={DashboardRoute} />
+            <Route path="/history/safecounts" component={SafeCountHistoryRoute} />
+            <Route path="/history/changeorders" component={ChangeOrderHistoryRoute} />
+            <Route path="/addcount" component={AddCountRoute} />
           </Switch>
         </BrowserRouter>
       </main>
-    ); 
+    );
   }
 }
-

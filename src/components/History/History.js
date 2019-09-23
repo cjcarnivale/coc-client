@@ -3,6 +3,7 @@ import CountService from "../../services/count-service";
 import DenominationService from "../../services/denominations-service";
 import dayjs from "dayjs";
 import clonedeep from "lodash/cloneDeep";
+import "./History.css"
 export default class History extends Component {
   constructor(props) {
     super(props);
@@ -39,10 +40,10 @@ export default class History extends Component {
     });
   };
 
-  postUpdate = date => {
+  patchUpdate = date => {
     date = dayjs(date).format("YYYY-MM-DD");
     const updatedCount = this.state.updatedCounts[this.state.editing];
-    CountService.updateSafeCount(updatedCount, date).then(
+    CountService.updateCount(updatedCount, this.props.type, date).then(
       res => {
         const updatedCount = clonedeep(this.state.updatedCounts);
         return !res.ok
@@ -70,11 +71,11 @@ export default class History extends Component {
     );
   };
 
-  deleteCount = (date, i) => {
+  deleteCount = (type, date, i) => {
     date = dayjs(date).format("YYYY-MM-DD");
     const copy = clonedeep(this.state.counts);
     copy.splice(i, 1);
-    CountService.deleteSafeCount(date).then(
+    CountService.deleteCount(type, date).then(
       () => {
         this.setState({
           counts: copy,
@@ -96,32 +97,34 @@ export default class History extends Component {
         {!this.state.isLoaded ? (
           <div className="loading">Loading</div>
         ) : (
-          <div className="history-list">
+          <div>
             {this.state.error && (
               <div className="validation-error">{this.state.error}</div>
             )}
             {this.state.counts.map((count, i) => (
-              <div key={i}>
-                <span>{count.id.slice(4, 16)}</span>
+              <div className="history-list"key={i}>
+                <span className="history-list-item">{count.id.slice(4, 16)}</span>
                 {this.state.denominations.map((den, j) => (
-                  <span key={j}>
+                  <span className="history-list-item" key={j}>
                     {`${den.name.charAt(0).toUpperCase()}${den.name.substring(
                       1
                     )}`}
                     :{" "}
                     {this.state.editing === i ? (
-                      <input
+                      <input className="history-list-item"
                         type="number"
                         min="0"
                         value={this.state.updatedCounts[i][den.name]}
                         onChange={e => this.updateCount(e, den.name)}
                       />
                     ) : (
-                      `${count[den.name]}`
+                      <span>
+                      {`${count[den.name]}`}
+                      </span>
                     )}
                   </span>
                 ))}
-                {`Total: ${this.state.denominations
+                <span className="history-list-item">{`Total: ${this.state.denominations
                   .map(den => den.name)
                   .map(
                     name =>
@@ -129,12 +132,12 @@ export default class History extends Component {
                       this.state.denominations.find(den => den.name === name)
                         .multiplier
                   )
-                  .reduce((acc, currentVal) => acc + currentVal, 0)}`}
+                  .reduce((acc, currentVal) => acc + currentVal, 0)}`}</span>
                 {this.state.editing === i ? (
                   <span>
                     <button
                       type="button"
-                      onClick={() => this.postUpdate(count.id.slice(4, 16))}
+                      onClick={() => this.patchUpdate(count.id.slice(4, 16))}
                     >
                       Submit
                     </button>
@@ -148,7 +151,7 @@ export default class History extends Component {
                     </button>
                   </span>
                 ) : (
-                  <span>
+                  <span id="history-button-container">
                     <button
                       type="button"
                       onClick={() => this.toggleEditItem(i)}
@@ -158,7 +161,7 @@ export default class History extends Component {
                     <button
                       type="button"
                       onClick={() =>
-                        this.deleteCount(
+                        this.deleteCount(this.props.type,
                           this.state.counts[i].id.slice(4, 16),
                           i
                         )
@@ -177,13 +180,13 @@ export default class History extends Component {
   }
 
   componentDidMount() {
-    function getSafeCountsAndDenominations(type) {
+    function getCountsAndDenominations(type) {
       return Promise.all([
         CountService.getAllCounts(type),
         DenominationService.getDenominations(type)
       ]);
     }
-    getSafeCountsAndDenominations(
+    getCountsAndDenominations(
     this.props.type).then(
       ([counts, denominations]) => {
         this.setState({
