@@ -1,0 +1,18 @@
+.heading {
+  text-align: center;
+}
+
+.add-link-container {
+  text-align: right;
+  margin-right: 20px; 
+}
+
+.loading {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}

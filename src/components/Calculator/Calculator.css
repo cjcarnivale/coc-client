@@ -1,5 +1,7 @@
 .count-form-container {
   margin-top: 30px;
+  display: flex;
+  justify-content: center;
 }
 
 .count-form span {
@@ -8,9 +10,14 @@
   text-align: left;
 }
 
-.count-form input {
+.count-form-input {
   margin-right: 10px;
   width: 50px;
+}
+
+#count-form-value {
+  width: 25px;
+  margin-right: 10px;
 }
 
 .count-form button {
@@ -22,7 +29,6 @@
 }
 
 .count-form {
-  margin: 0 auto;
   text-align: center;
   border: 1px solid black;
   padding: 20px;
@@ -33,35 +39,31 @@
 .error,
 .loading,
 .date-display,
-.already-entered,
-.validation-error {
+.already-entered {
   text-align: center;
 }
 
+
+.total-match,
 .error {
   color: red;
-  font-size: 2em;
-}
-
-.loading {
-  animation: blinker 1s linear infinite;
-}
-
-.total-match, 
-.validation-error {
-  color: red; 
 }
 
 .already-entered {
-  color: green; 
+  color: green;
 }
 
-.validation-error {
-  margin-bottom: 2em; 
+.error {
+  margin-bottom: 10px;
 }
 
-@keyframes blinker {
-  50% {
-    opacity: 0;
-  }
+.date-display {
+  margin-bottom: 15px;
 }
+
+.generate-button-container {
+  display: flex;
+  justify-content: center
+}
+
+
